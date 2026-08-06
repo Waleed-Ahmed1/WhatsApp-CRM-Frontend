@@ -1,9 +1,17 @@
 import api from './api.js';
 
 export const loginuser = (name,email) => {
-    api.post('/auth/login',{email,password})
+    return api.post('/auth/login',{email,password})
 }
 
 export const registeruser = (name,email,password) => {
-    api.post('/auth/register',{name,email,password})
+    return api.post('/auth/register',{name,email,password})
+}
+
+export const logoutuser = () => {
+    return api.post('/auth/logout')
+}
+
+export const refreshuser = () => {
+    return api.post('auth/refresh')
 }
