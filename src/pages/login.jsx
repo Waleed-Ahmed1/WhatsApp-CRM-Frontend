@@ -3,6 +3,7 @@ import { useState } from "react";
 import "./login.css";
 import { Link } from "react-router-dom";
 import {toast,Toaster} from "react-hot-toast";
+import { loginuser } from "../api/auth";
 
 function Login() {
     const [email, setEmail] = useState("");
@@ -12,30 +13,19 @@ function Login() {
     const loginbutton = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ email, password })
-            });
 
-            const data = await response.json();
+            const res = await loginuser(email,password)
+            
 
-            if (!response.ok) {
-                toast.error(data.message || "Invalid credentials");
-                return;
-            }
-
-            if (data.token) {
-                localStorage.setItem("token", data.token);
+            if (res.data.token) {
+                localStorage.setItem("token", res.data.token);
             }
             // navigate("/dashboard");
-            toast.success(data.message || "Login successful");
+            toast.success(res.data.message || "Login successful");
 
         } catch (err) {
             console.error(err);
-            toast.error("Something went wrong. Please try again.");
+            toast.error(err.response?.data?.message || "Something went wrong. Please try again.");
         } finally {
             setLoading(false);
         }

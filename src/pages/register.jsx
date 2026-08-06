@@ -3,6 +3,7 @@ import { useState } from "react";
 import "./register.css";
 import { Link,useNavigate } from "react-router-dom";
 import {toast,Toaster} from "react-hot-toast";
+import { registeruser } from "../api/auth";
 
 
 function Register() {
@@ -16,21 +17,10 @@ function Register() {
         setLoading(true);
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/register`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ name, email, password })
-            });
+        
+            const res = await registeruser(name,email,password)
 
-            const data = await response.json();
-            if (!response.ok) {
-                toast.error(data.message || "Something went wrong.");
-                return;
-            }
-
-            toast.success(data.message|| "User Created Successfully.");
+            toast.success(res.data.message|| "User Created Successfully.");
 
             setTimeout(() => {
                 navigate("/login");
@@ -38,7 +28,7 @@ function Register() {
                         
         } catch (err) {
             console.error(err);
-            toast.error("Something went wrong. Please try again.");
+            toast.error(err.response?.data?.message || "Something went wrong. Please try again.");
         } finally {
             setLoading(false);
         }
