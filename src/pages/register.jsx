@@ -28,7 +28,7 @@ function Register() {
                         
         } catch (err) {
             console.error(err);
-            toast.error(err.response?.data?.message || "Something went wrong. Please try again.");
+            toast.error(err.response?.data?.message || "Something went wrong. Please try again later.");
         } finally {
             setLoading(false);
         }
