@@ -41,7 +41,7 @@ function Register() {
                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                         </svg>
                     </div>
-                    <h1 className="login-title">BotControl</h1>
+                    <h1 className="login-title">Whatsapp Panel</h1>
                     <p className="login-subtitle">Create an Admin Account</p>
                 </div>
 
