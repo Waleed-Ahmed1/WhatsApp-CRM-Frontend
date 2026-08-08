@@ -1,6 +1,6 @@
 import api from './api.js';
 
-export const loginuser = (name,email) => {
+export const loginuser = (email,password) => {
     return api.post('/auth/login',{email,password})
 }
 
@@ -13,5 +13,5 @@ export const logoutuser = () => {
 }
 
 export const refreshuser = () => {
-    return api.post('auth/refresh')
+    return api.post('/auth/refresh')
 }

@@ -1,6 +1,6 @@
 import React from "react";
 import { useState } from "react";
-import "./login.css";
+import "../css/login.css";
 import { Link } from "react-router-dom";
 import {toast,Toaster} from "react-hot-toast";
 import { loginuser } from "../api/auth";
@@ -18,7 +18,8 @@ function Login() {
             
 
             if (res.data.token) {
-                localStorage.setItem("token", res.data.token);
+                localStorage.setItem("token", res.data.accessToken);
+                localStorage.setItem("user",JSON.stringify(res.data.user))
             }
             // navigate("/dashboard");
             toast.success(res.data.message || "Login successful");

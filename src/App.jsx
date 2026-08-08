@@ -2,6 +2,7 @@ import './App.css'
 import Login from "./pages/login.jsx"
 import Register from "./pages/register.jsx"
 import Logout from './pages/logout.jsx';
+import LiveChats from './pages/livechats.jsx';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { FaCircleCheck } from "react-icons/fa6";
@@ -21,7 +22,7 @@ function App() {
         <Route path="/logout" element={<Logout />} />
 
         <Route path="/dashboard" element={<DashboardLayout />}>
-          {/* <Route index element={<LiveChats />} /> */}
+          <Route path='chat' element={<LiveChats />} />
           <Route path="users" element={<SystemUsers />} />
           {/* <Route path="groups" element={<Groups />} />
           <Route path="broadcast" element={<Broadcast />} />

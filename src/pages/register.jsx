@@ -1,6 +1,6 @@
 import React from "react";
 import { useState } from "react";
-import "./register.css";
+import "../css/register.css";
 import { Link,useNavigate } from "react-router-dom";
 import {toast,Toaster} from "react-hot-toast";
 import { registeruser } from "../api/auth";
