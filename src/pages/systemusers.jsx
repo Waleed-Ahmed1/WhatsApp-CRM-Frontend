@@ -15,7 +15,7 @@ function SystemUsers() {
             setError(false);
             try {
                 const res = await getusers();
-                setUsers(res.data.users);
+                setUsers(res.data.users || []);
             } 
             catch (err) {
                 toast.error("Failed to load users");
