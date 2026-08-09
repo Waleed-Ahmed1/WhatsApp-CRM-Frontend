@@ -9,7 +9,7 @@ import { FaCircleCheck } from "react-icons/fa6";
 import { MdErrorOutline } from "react-icons/md";
 import DashboardLayout from './layouts/Dashboardlayout.jsx';
 import SystemUsers from './pages/systemusers.jsx';
-
+import Settings from './pages/setting.jsx';
 
 function App() {
   return (
@@ -26,8 +26,8 @@ function App() {
           <Route path="users" element={<SystemUsers />} />
           {/* <Route path="groups" element={<Groups />} />
           <Route path="broadcast" element={<Broadcast />} />
-          <Route path="analytics" element={<Analytics />} />
-          <Route path="settings" element={<Settings />} /> */}
+          <Route path="analytics" element={<Analytics />} /> */}
+          <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>
     </BrowserRouter>
