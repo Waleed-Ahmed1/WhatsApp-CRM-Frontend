@@ -4,8 +4,12 @@ import "../css/login.css";
 import { Link } from "react-router-dom";
 import {toast,Toaster} from "react-hot-toast";
 import { loginuser } from "../api/auth";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
+
+    const navigate = useNavigate();
+
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
@@ -17,12 +21,12 @@ function Login() {
             const res = await loginuser(email,password)
             
 
-            if (res.data.token) {
+            if (res.data.accessToken) {
                 localStorage.setItem("token", res.data.accessToken);
                 localStorage.setItem("user",JSON.stringify(res.data.user))
+                navigate("/dashboard");
+                toast.success(res.data.message || "Login successful");
             }
-            // navigate("/dashboard");
-            toast.success(res.data.message || "Login successful");
 
         } catch (err) {
             console.error(err);

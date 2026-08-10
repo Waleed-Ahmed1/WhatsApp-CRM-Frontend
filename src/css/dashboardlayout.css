@@ -1,0 +1,26 @@
+.dashboard-layout {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
+.dashboard-content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .dashboard-layout {
+    flex-direction: column;
+  }
+
+  .dashboard-content {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    padding-top: 56px;
+    box-sizing: border-box;
+  }
+}
+

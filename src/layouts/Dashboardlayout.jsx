@@ -3,6 +3,7 @@ import Sidebar from "../component/Sidebar";
 import { logoutuser } from "../api/auth";
 import { Navigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import '../css/dashboardlayout.css'
 
 export default function DashboardLayout() {
 
@@ -29,7 +30,7 @@ export default function DashboardLayout() {
 
     return (
 
-        <div style={{ display: "flex", height: "100vh" }}>
+        <div className="dashboard-layout">
             <Sidebar onLogout={logout} username={user_name} email={email_user} />
 
             <div style={{ flex: 1 }}>

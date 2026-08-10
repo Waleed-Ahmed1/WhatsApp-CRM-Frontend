@@ -1,0 +1,783 @@
+/* ================================
+   LIVE CHAT PAGE
+================================ */
+
+.livechat-page {
+    width: 100%;
+    height: 100vh;
+
+    display: flex;
+
+    background: #111b21;
+
+    color: #e9edef;
+
+    font-family: Arial, Helvetica, sans-serif;
+
+    overflow: hidden;
+}
+
+
+/* ================================
+   LEFT CHAT LIST — matched to app theme
+================================ */
+
+.chat-list {
+    width: 360px;
+    min-width: 360px;
+
+    height: 100vh;
+
+    background: #141824;
+
+    border-right: 1px solid #232838;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* ================================
+   CHAT LIST HEADER — matched to app theme
+================================ */
+
+.chat-list-header {
+    height: 64px;
+
+    padding: 0 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    background: #141824;
+    border-bottom: 1px solid #232838;
+}
+
+.chat-header-title {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.chat-header-title h2 {
+    margin: 0;
+
+    font-size: 18px;
+    font-weight: 700;
+
+    color: #fff;
+    font-family: monospace;
+}
+
+.online-status {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+
+    font-size: 11px;
+
+    color: #6b7280;
+}
+
+.status-dot {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: #25d366;
+}
+
+
+/* ================================
+   SEARCH BUTTON — matched to app theme
+================================ */
+
+.chat-search-btn {
+    width: 38px;
+    height: 38px;
+
+    border: none;
+    border-radius: 50%;
+
+    background: transparent;
+
+    color: #9aa0ac;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+
+    font-size: 16px;
+}
+
+.chat-search-btn:hover {
+    background: #232838;
+}
+
+
+/* ================================
+   SEARCH BAR — matched to app theme
+================================ */
+
+.chat-search {
+    margin: 10px 12px;
+
+    height: 38px;
+
+    padding: 0 12px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    border-radius: 8px;
+
+    background: #0b0d12;
+    border: 1px solid #232838;
+
+    color: #6b7280;
+}
+
+.chat-search svg {
+    font-size: 14px;
+}
+
+.chat-search input {
+    width: 100%;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+
+    color: #fff;
+
+    font-size: 13px;
+}
+
+.chat-search input::placeholder {
+    color: #6b7280;
+}
+
+
+/* ================================
+   CHAT ITEMS
+================================ */
+
+.chat-items {
+    flex: 1;
+
+    overflow-y: auto;
+}
+
+
+/* Scrollbar */
+
+.chat-items::-webkit-scrollbar,
+.messages-area::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-items::-webkit-scrollbar-track,
+.messages-area::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chat-items::-webkit-scrollbar-thumb,
+.messages-area::-webkit-scrollbar-thumb {
+    background: #374045;
+
+    border-radius: 10px;
+}
+
+
+/* ================================
+   CHAT ITEM — matched to app theme
+================================ */
+
+.chat-item {
+    height: 72px;
+
+    padding: 0 14px;
+
+    display: flex;
+    align-items: center;
+
+    cursor: pointer;
+
+    border-bottom: 1px solid #1c2130;
+}
+
+.chat-item:hover {
+    background: #1a1f2c;
+}
+
+.chat-item.active-chat {
+    background: rgba(37, 211, 102, 0.08);
+    border-left: 3px solid #25d366;
+}
+
+
+/* ================================
+   AVATAR — colors unchanged (original gray)
+================================ */
+
+.chat-avatar {
+    width: 47px;
+    height: 47px;
+
+    min-width: 45px;
+
+    margin-right: 13px;
+
+    position: relative;
+
+    border-radius: 50%;
+
+    background: #818380;
+
+    color: #ffffff;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 20px;
+    font-weight: 500;
+}
+
+
+/* Online dot */
+
+.avatar-online {
+    position: absolute;
+
+    width: 11px;
+    height: 11px;
+
+    right: 1px;
+    bottom: 1px;
+
+    border-radius: 50%;
+
+    background: #00a884;
+
+    border: 2px solid #202c33;
+}
+
+
+/* ================================
+   CHAT INFORMATION — matched to app theme
+================================ */
+
+.chat-info {
+    min-width: 0;
+
+    flex: 1;
+}
+
+.chat-name-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 5px;
+
+    gap: 10px;
+}
+
+.chat-name {
+    color: #fff;
+
+    font-size: 15px;
+    font-weight: 500;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+.chat-time {
+    color: #6b7280;
+
+    font-size: 11px;
+
+    white-space: nowrap;
+}
+
+.chat-message-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+}
+
+.chat-last-message {
+    color: #6b7280;
+
+    font-size: 13px;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+
+/* ================================
+   UNREAD COUNT — matched to app theme
+================================ */
+
+.unread-count {
+    min-width: 19px;
+    height: 19px;
+
+    padding: 0 5px;
+
+    border-radius: 50%;
+
+    background: #25d366;
+
+    color: #0b0d12;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+/* ================================
+   RIGHT CHAT WINDOW
+================================ */
+
+.chat-window {
+    flex: 1;
+
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+
+    background: #0b141a;
+}
+
+
+/* ================================
+   CHAT WINDOW HEADER — matched to app theme
+================================ */
+
+.chat-window-header {
+    height: 64px;
+
+    padding: 0 20px;
+
+    background: #141824;
+
+    border-bottom: 1px solid #232838;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+
+/* ================================
+   SELECTED USER — avatar colors unchanged
+================================ */
+
+.selected-user {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    gap: 15px;
+}
+
+.selected-avatar {
+    width: 44px;
+    height: 44px;
+
+    margin: 0;
+
+    position: relative;
+
+    border-radius: 50%;
+
+    background: #37393a;
+
+    color: #ffffff;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 17px;
+    font-weight: 500;
+
+    flex-shrink: 0;
+}
+
+.selected-user-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.selected-user-info h3 {
+    margin: 0;
+
+    color: #fff;
+
+    font-size: 18px;
+    font-weight: 520;
+}
+
+.selected-user-info span {
+    color: #25d366;
+    font-size: 12px;
+}
+
+
+/* ================================
+   HEADER ACTIONS — matched to app theme
+================================ */
+
+.chat-actions {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+}
+
+.chat-actions button {
+    width: 40px;
+    height: 40px;
+
+    border: none;
+    border-radius: 50%;
+
+    background: transparent;
+
+    color: #9aa0ac;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 15px;
+}
+
+.chat-actions button:hover {
+    background: #232838;
+}
+
+
+/* ================================
+   MESSAGES AREA — unchanged (original)
+================================ */
+
+.messages-area {
+    flex: 1;
+
+    padding: 25px 7%;
+
+    overflow-y: auto;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 7px;
+
+    background-color: #0b141a;
+
+    background-image:
+        radial-gradient(
+            rgba(255, 255, 255, 0.025) 1px,
+            transparent 1px
+        );
+
+    background-size: 18px 18px;
+}
+
+
+/* ================================
+   DATE — unchanged (original)
+================================ */
+
+.chat-date {
+    display: flex;
+    justify-content: center;
+
+    margin: 5px 0 15px;
+}
+
+.chat-date span {
+    padding: 6px 12px;
+
+    border-radius: 7px;
+
+    background: #202c33;
+
+    color: #8696a0;
+
+    font-size: 11px;
+}
+
+
+/* ================================
+   MESSAGE ROW — unchanged (original)
+================================ */
+
+.message-row {
+    width: 100%;
+
+    display: flex;
+}
+
+.message-row.received {
+    justify-content: flex-start;
+}
+
+.message-row.sent {
+    justify-content: flex-end;
+}
+
+
+/* ================================
+   MESSAGE BUBBLE — unchanged (original)
+================================ */
+
+.message-bubble {
+    max-width: 65%;
+
+    padding: 8px 10px 6px;
+
+    border-radius: 8px;
+
+    position: relative;
+
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+.received .message-bubble {
+    background: #202c33;
+
+    border-top-left-radius: 2px;
+}
+
+.sent .message-bubble {
+    background: #005c4b;
+
+    border-top-right-radius: 2px;
+}
+
+.message-bubble p {
+    margin: 0;
+
+    padding-right: 45px;
+
+    color: #e9edef;
+
+    font-size: 14px;
+
+    line-height: 1.4;
+}
+
+.message-time {
+    display: block;
+
+    margin-top: 4px;
+
+    text-align: right;
+
+    color: #8696a0;
+
+    font-size: 10px;
+}
+
+.sent .message-time {
+    color: #8ca8a1;
+}
+
+
+/* ================================
+   MESSAGE INPUT — unchanged (original)
+================================ */
+
+.message-input-area {
+    min-height: 64px;
+
+    padding: 10px 15px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    background: #202c33;
+
+    border-top: 1px solid #2a3942;
+}
+
+
+/* ================================
+   INPUT — unchanged (original)
+================================ */
+
+.message-input-area input {
+    flex: 1;
+
+    height: 42px;
+
+    padding: 0 15px;
+
+    border: none;
+    outline: none;
+
+    border-radius: 8px;
+
+    background: #2a3942;
+
+    color: #e9edef;
+
+    font-size: 14px;
+}
+
+.message-input-area input::placeholder {
+    color: #8696a0;
+}
+
+
+/* ================================
+   INPUT ICON BUTTONS — unchanged (original)
+================================ */
+
+.message-icon-btn {
+    width: 40px;
+    height: 40px;
+
+    flex-shrink: 0;
+
+    border: none;
+
+    border-radius: 50%;
+
+    background: transparent;
+
+    color: #aebac1;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 17px;
+}
+
+.message-icon-btn:hover {
+    background: #2a3942;
+}
+
+.send-message-btn {
+    width: 42px;
+    height: 42px;
+
+    flex-shrink: 0;
+
+    border: none;
+
+    border-radius: 50%;
+
+    background: #00a884;
+
+    color: #000000;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 17px;
+
+    box-shadow: 0 2px 6px rgba(0, 168, 132, 0.4);
+}
+
+.send-message-btn:hover {
+    background: #06cf9c;
+}
+
+
+/* ================================
+   RESPONSIVE
+================================ */
+
+@media (max-width: 900px) {
+
+    .chat-list {
+        width: 300px;
+        min-width: 300px;
+    }
+
+    .messages-area {
+        padding: 20px 4%;
+    }
+
+    .message-bubble {
+        max-width: 75%;
+    }
+}
+
+
+@media (max-width: 700px) {
+
+    .chat-list {
+        width: 100%;
+        min-width: 100%;
+    }
+
+    .chat-window {
+        display: none;
+    }
+}
+
+
+/* ================================
+   MESSAGE TICKS (sent / delivered / read)
+================================ */
+
+.tick-icon {
+    font-size: 12px;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+
+/* single grey tick — sent, not yet delivered */
+.tick-sent {
+    color: #8696a0;
+}
+
+/* double grey tick — delivered, not yet read */
+.tick-delivered {
+    color: #8696a0;
+}
+
+/* double blue tick — read */
+.tick-read {
+    color: #53bdeb;
+}

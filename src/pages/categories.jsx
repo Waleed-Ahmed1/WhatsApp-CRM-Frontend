@@ -59,7 +59,7 @@ function Categories() {
         try{
             await deletecategory(cat)
             setgcategory((prev) => prev.filter((c) => c !== cat))
-            toast.success("Category deleted")
+            toast.success(res.data,message || "Category deleted")
         }catch(err){
             toast.error(err.response?.data?.message || "Something went Wrong")
         }

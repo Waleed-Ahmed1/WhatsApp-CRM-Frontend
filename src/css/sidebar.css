@@ -140,3 +140,241 @@
 }
 
 
+/* ================================================= */
+/*                  MOBILE HEADER                    */
+/* ================================================= */
+
+.mobile-header {
+  display: none;
+}
+
+.hamburger-btn {
+  display: none;
+}
+
+.sidebar-close-btn {
+  display: none;
+}
+
+.sidebar-overlay {
+  display: none;
+}
+
+
+/* ================================================= */
+/*                  TABLET                           */
+/* ================================================= */
+
+@media (max-width: 1024px) {
+
+  .sidebar {
+    width: 180px;
+  }
+
+  .sidebar-link {
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+
+  .sidebar-title {
+    font-size: 14px;
+  }
+
+}
+
+
+/* ================================================= */
+/*                  MOBILE                           */
+/* ================================================= */
+
+@media (max-width: 768px) {
+
+  /*
+    This header takes real space at the top.
+    Therefore the page content starts BELOW the hamburger.
+  */
+  .mobile-header {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 56px;
+    background: #141824;
+    border-bottom: 1px solid #232838;
+    padding: 0 12px;
+    box-sizing: border-box;
+    flex-shrink: 0;
+  }
+
+
+  /* Hamburger is inside the header, NOT fixed */
+  .hamburger-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 40px;
+    height: 40px;
+
+    border-radius: 8px;
+    border: 1px solid #232838;
+
+    background: #141824;
+    color: #fff;
+
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+
+  /*
+    Sidebar becomes a drawer.
+    It does NOT take space from the page.
+  */
+  .sidebar {
+    position: fixed;
+
+    top: 0;
+    left: 0;
+
+    width: 240px;
+    height: 100vh;
+
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+
+    z-index: 1200;
+  }
+
+
+  /* Open sidebar */
+  .sidebar.sidebar-open {
+    transform: translateX(0);
+  }
+
+
+  /* Close button inside opened sidebar */
+  .sidebar-close-btn {
+    display: block;
+
+    align-self: flex-end;
+
+    margin: 10px 10px 0 0;
+
+    background: transparent;
+    border: none;
+
+    color: #9aa0ac;
+
+    font-size: 18px;
+    cursor: pointer;
+  }
+
+
+  /* Dark background behind opened sidebar */
+  .sidebar-overlay {
+    display: block;
+
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.6);
+
+    z-index: 1150;
+  }
+
+}
+
+
+/* ================================================= */
+/*                  SMALL MOBILE                     */
+/* ================================================= */
+
+@media (max-width: 480px) {
+
+  .mobile-header {
+    height: 52px;
+    padding: 0 10px;
+  }
+
+  .hamburger-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+
+  .sidebar {
+    width: 78vw;
+    max-width: 260px;
+  }
+
+  .sidebar-header {
+    padding: 16px 14px 14px;
+  }
+
+  .sidebar-logo {
+    width: 30px;
+    height: 30px;
+  }
+
+  .sidebar-title {
+    font-size: 13px;
+  }
+
+  .sidebar-nav {
+    padding: 8px 6px;
+  }
+
+  .sidebar-link {
+    font-size: 13px;
+    padding: 8px 10px;
+    gap: 8px;
+  }
+
+  .sidebar-footer {
+    padding: 10px 8px;
+  }
+
+  .sidebar-username {
+    font-size: 12px;
+  }
+
+  .sidebar-email {
+    font-size: 9px;
+  }
+
+}
+
+
+/* ================================================= */
+/*                  VERY SMALL MOBILE                */
+/* ================================================= */
+
+@media (max-width: 360px) {
+
+  .mobile-header {
+    height: 50px;
+  }
+
+  .sidebar {
+    width: 85vw;
+  }
+
+  .sidebar-link {
+    font-size: 12px;
+    padding: 7px 8px;
+  }
+
+  .sidebar-icon {
+    font-size: 13px;
+  }
+
+}
+
+
+.mobile-header-title {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  margin-left: 10px;
+}
