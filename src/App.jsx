@@ -10,6 +10,8 @@ import { MdErrorOutline } from "react-icons/md";
 import DashboardLayout from './layouts/Dashboardlayout.jsx';
 import SystemUsers from './pages/systemusers.jsx';
 import Settings from './pages/setting.jsx';
+import Products from './pages/products.jsx';
+import Categories from './pages/categories.jsx';
 
 function App() {
   return (
@@ -27,6 +29,8 @@ function App() {
           {/* <Route path="groups" element={<Groups />} />
           <Route path="broadcast" element={<Broadcast />} />
           <Route path="analytics" element={<Analytics />} /> */}
+          <Route path="categories" element={<Categories />} />
+          <Route path="products" element={<Products />} />
           <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>

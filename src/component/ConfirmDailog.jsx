@@ -1,15 +1,16 @@
-export default function ConfirmDialog({ open, message, onConfirm, onCancel }) {
+export default function InputDialog({ open, value, onChange, onSubmit, onClose }) {
   if (!open) return null;
 
   return (
-    <div onClick={onCancel} style={{ position: "fixed", inset: 0,fontFamily:"cursive", background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ background: "#141824", border: "1px solid #232838", borderRadius: 10, padding: 20, width: 300 }}>
-        <p style={{ color: "#fff", fontSize: 14, marginBottom: 16 }}>{message}</p>
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-          <button onClick={onCancel} style={{ background: "transparent", border: "1px solid #232838", color: "#9aa0ac", borderRadius: 6, padding: "6px 14px", cursor: "pointer" }}>Cancel</button>
-          <button onClick={onConfirm} style={{ background: "rgba(248,113,113,0.15)", border: "none", color: "#f87171", borderRadius: 6, padding: "6px 14px", cursor: "pointer" }}>Delete</button>
-        </div>
-      </div>
+    <div style={{ background: "#141824", border: "1px solid #232838", borderRadius: 10, padding: 16, marginTop: 10, maxWidth: 300 }}>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        style={{ width: "100%", background: "#0b0d12", border: "1px solid #232838", borderRadius: 8, padding: "8px 10px", color: "#fff", boxSizing: "border-box", marginBottom: 10 }}
+      />
+      <button onClick={onSubmit}>Submit</button>
+      <button onClick={onClose}>Close</button>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import "../css/sidebar.css";
-import { FaWhatsapp } from "react-icons/fa";
+import { FaWhatsapp,FaBox, FaTags } from "react-icons/fa";
 
 const NAV = [
   { path: "/dashboard/chat", label: "Live Chats", icon: <FaWhatsapp size={24} color="#25D366" /> },
@@ -12,6 +12,8 @@ const NAV = [
   { path: "/dashboard/keywords", label: "Keywords", icon: "🔑" },
   { path: "/dashboard/uploads", label: "Uploads", icon: "📁" },
   { path: "/dashboard/analytics", label: "Analytics", icon: "📊" },
+  { path: "/dashboard/categories", label: "Category", icon: <FaTags size={13} />},
+  { path: "/dashboard/products", label: "Products", icon: <FaBox size={11} color="#a4c063" />},
   { path: "/dashboard/settings", label: "Settings", icon: "⚙️" },
 ];
 
