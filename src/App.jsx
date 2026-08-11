@@ -12,6 +12,8 @@ import SystemUsers from './pages/systemusers.jsx';
 import Settings from './pages/setting.jsx';
 import Products from './pages/products.jsx';
 import Categories from './pages/categories.jsx';
+import ProductView from './pages/productview.jsx';
+import Contacts from './pages/contacts.jsx';
 
 function App() {
   return (
@@ -32,6 +34,8 @@ function App() {
           <Route path="categories" element={<Categories />} />
           <Route path="products" element={<Products />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="contacts" element={<Contacts />} />
+          <Route path="products/:id" element={<ProductView />} />
         </Route>
       </Routes>
     </BrowserRouter>

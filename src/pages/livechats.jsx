@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaSearch, FaPhone, FaEllipsisV, FaPaperclip, FaMicrophone, FaSmile, FaPaperPlane, FaCheck, FaCheckDouble } from "react-icons/fa";
+import { FaSearch, FaPhone, FaEllipsisV, FaPaperclip, FaMicrophone, FaSmile, FaPaperPlane, FaCheck, FaCheckDouble, FaWhatsapp} from "react-icons/fa";
 import "../css/livechats.css";
 import { getcontacts } from "../api/livechats";
 import { MdDoneAll,MdDone } from "react-icons/md";
@@ -60,7 +60,7 @@ function LiveChats() {
                 {/* Header */}
                 <div className="chat-list-header">
                     <div className="chat-header-title">
-                        <h2>Live Chats</h2>
+                        <h2><FaWhatsapp size={18} color="#25D366" /> Live Chats</h2>
                         <span className="online-status">
                             <span className="status-dot"></span>
                             Online

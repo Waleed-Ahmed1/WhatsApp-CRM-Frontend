@@ -2,12 +2,13 @@ import { NavLink } from "react-router-dom";
 import "../css/sidebar.css";
 import { FaWhatsapp, FaBox, FaTags } from "react-icons/fa";
 import { useState } from "react";
+import { MdContacts, MdContactPhone, MdContactMail } from 'react-icons/md';
 
 const NAV = [
   { path: "/dashboard/chat", label: "Live Chats", icon: <FaWhatsapp size={18} color="#25D366" /> },
   { path: "/dashboard/users", label: "System Users", icon: "👤" },
   { path: "/dashboard/groups", label: "Groups", icon: "👥" },
-  { path: "/dashboard/contacts", label: "Contacts", icon: "📇" },
+  { path: "/dashboard/contacts", label: "Contacts", icon: <MdContacts color="white" size={16}/> },
   { path: "/dashboard/broadcast", label: "Broadcast", icon: "📢" },
   { path: "/dashboard/templates", label: "Templates", icon: "📝" },
   { path: "/dashboard/keywords", label: "Keywords", icon: "🔑" },
