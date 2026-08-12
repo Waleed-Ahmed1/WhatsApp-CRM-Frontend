@@ -20,7 +20,7 @@ useEffect(() => {
     const fetchDelay = async () => {
         try {
             const res = await getDelayFromServer();
-            setDelay(res.data.delay.responseDelay);
+            setDelay(res.data.delay);
         } catch (err) {
             toast.error(err.response?.data?.message || "Failed to Fetch the Response Delay");
         } finally {
@@ -70,7 +70,7 @@ useEffect(() => {
     const getSystemPrompt = async () => {
         try {
             const res = await getsystemprompt();
-            setSystemprompt(res.data.systemprompt);
+            setSystemprompt(res.data.systemPrompt);
         } catch (err) {
             toast.error(err.response?.data?.message || "Failed to Fetch the System Prompt");
         }

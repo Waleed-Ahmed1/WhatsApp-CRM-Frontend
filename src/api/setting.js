@@ -1,7 +1,7 @@
 import api from "./api";
 
 export const setdelay = (value) =>{
-    return api.post(`settings/delay/${value}`)
+    return api.patch(`settings/delay/${value}`)
 }
 
 export const getdelay = () =>{
@@ -9,17 +9,17 @@ export const getdelay = () =>{
 }
 
 export const savetoken = (token) =>{
-    return api.post('settings/set-meta-wa-token', {token})
+    return api.patch('settings/set-meta-wa-token', {token})
 }
 
 export const gettoken = () =>{
     return api.get('settings/get-meta-wa-token')
 }
 
-export const setsystemprompt = () => {
-    return api.post('settings/set-systemprompt')
+export const setsystemprompt = (systemPrompt) => {
+    return api.patch('settings/set-system-prompt', { systemPrompt });
 }
 
 export const getsystemprompt = () => {
-    return api.get('settings/get-systemprompt')
+    return api.get('settings/get-system-prompt')
 }
