@@ -24,7 +24,7 @@ function Login() {
             if (res.data.accessToken) {
                 localStorage.setItem("token", res.data.accessToken);
                 localStorage.setItem("user",JSON.stringify(res.data.user))
-                navigate("/dashboard/chats");
+                navigate("/dashboard/chat");
                 toast.success(res.data.message || "Login successful");
             }
 

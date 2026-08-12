@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import '../css/groups.css'
-import { getallgroups, getgroupbyid } from "../api/groups";
-import { toast, Toaster } from "react-hot-toast";
-
+import { getallgroups, getgroupbyid, creategroup } from "../api/groups";
+import toast from "react-hot-toast";
 
 function Groups() {
 
@@ -11,6 +10,13 @@ function Groups() {
     const [selectedGroupId, setSelectedGroupId] = useState(null)
     const [selectedGroup, setSelectedGroup] = useState(null)
     const [groupLoading, setGroupLoading] = useState(false)
+
+    // Add Group dialog
+    const [showAddDialog, setShowAddDialog] = useState(false)
+    const [newName, setNewName] = useState("")
+    const [newDescription, setNewDescription] = useState("")
+    const [newPrompt, setNewPrompt] = useState("")
+    const [saving, setSaving] = useState(false)
 
     const getallGroups = async () => {
         try {
@@ -39,6 +45,27 @@ function Groups() {
         }
     }
 
+    const handleAddGroup = async () => {
+        if (!newName.trim()) {
+            toast.error("Please enter a group name");
+            return;
+        }
+        setSaving(true)
+        try {
+            const res = await creategroup(newName, newDescription, newPrompt)
+            toast.success(res.data.message || "Group Added Successfully")
+            setShowAddDialog(false)
+            setNewName("")
+            setNewDescription("")
+            setNewPrompt("")
+            getallGroups()
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Group added Failed !")
+        } finally {
+            setSaving(false)
+        }
+    }
+
 
 
     return (
@@ -48,6 +75,13 @@ function Groups() {
                 <div className="group-section-header">
                     <h2>Groups</h2>
                     <span className="group-count">{allgroups.length} groups</span>
+                </div>
+
+                {/* Add Group box */}
+                <div className="group-add-box">
+                    <button className="group-add-btn" onClick={() => setShowAddDialog(true)}>
+                        + Add Group
+                    </button>
                 </div>
 
                 <div className="group-list">
@@ -178,7 +212,6 @@ function Groups() {
                         </div>
 
 
-                        {/* AI Prompt */}
                         <div className="group-detail-section">
 
                             <div className="group-detail-section-title">
@@ -241,7 +274,6 @@ function Groups() {
                         </div>
 
 
-                        {/* Future actions */}
                         <div className="group-detail-actions">
 
                             <button className="group-action-btn">
@@ -260,6 +292,51 @@ function Groups() {
 
             </div>
 
+            {showAddDialog && (
+                <div className="overlay" onClick={() => setShowAddDialog(false)}>
+                    <div className="add-group-dialog" onClick={(e) => e.stopPropagation()}>
+                        <h3 className="dialog-title">Add Group</h3>
+
+                        <div className="dialog-field">
+                            <label className="dialog-label">Group Name</label>
+                            <input
+                                type="text"
+                                placeholder="e.g. VIP Customers"
+                                className="dialog-input"
+                                value={newName}
+                                onChange={(e) => setNewName(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="dialog-field">
+                            <label className="dialog-label">Description</label>
+                            <textarea
+                                placeholder="What is this group for? (optional)"
+                                className="dialog-textarea"
+                                value={newDescription}
+                                onChange={(e) => setNewDescription(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="dialog-field">
+                            <label className="dialog-label">AI Prompt</label>
+                            <textarea
+                                placeholder="Custom instructions for the bot in this group (optional)"
+                                className="dialog-textarea"
+                                value={newPrompt}
+                                onChange={(e) => setNewPrompt(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="dialog-actions">
+                            <button className="dialog-cancel-btn" onClick={() => setShowAddDialog(false)}>Cancel</button>
+                            <button className="dialog-save-btn" onClick={handleAddGroup}>
+                                {saving ? "Saving..." : "Save Group"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
         </div>
 
@@ -269,6 +346,3 @@ function Groups() {
 }
 
 export default Groups;
-
-
-
