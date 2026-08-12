@@ -13,8 +13,6 @@ export const getgroupmembers = (id) => {
 };
 
 export const creategroup = (name) => {
-    // backend only accepts { name } on create — description/prompt are set
-    // afterward via the dedicated patch endpoints below
     return api.post('/groups/create-group', { name });
 };
 
@@ -22,6 +20,8 @@ export const deletegroup = (id) => {
     return api.delete(`/groups/delete-group/${id}`);
 };
 
+// NOTE: backend route has no :groupId in the path — it identifies the group
+// by `groupName` in the body instead, not by id
 export const addcontacttogroup = (contactId, groupName) => {
     return api.patch('/groups/add-contact-to-group', { contactId, groupName });
 };
@@ -49,3 +49,7 @@ export const deletegroupprompt = (id) => {
 export const updategroupname = (id, name) => {
     return api.patch(`/groups/update-group-name/${id}`, { name });
 };
+
+export const tooglegroupmodebyid = (id, value) => {
+    return api.patch(`/groups/toggle-group-ai-mode-by-id/${id}`, { value })
+}

@@ -1,348 +1,540 @@
-import { useEffect, useState } from "react";
-import '../css/groups.css'
-import { getallgroups, getgroupbyid, creategroup } from "../api/groups";
+import { useState, useEffect } from "react";
+import "../css/groups.css";
+import {
+    getallgroups,
+    getgroupbyid,
+    getgroupmembers,
+    creategroup,
+    deletegroup,
+    addcontacttogroup,
+    removecontactfromgroup,
+    setdescription,
+    deletedescription,
+    setgroupprompt,
+    deletegroupprompt,
+    updategroupname,
+    tooglegroupmodebyid
+} from "../api/groups";
+import { getcontacts } from "../api/contacts";
 import toast from "react-hot-toast";
+import ConfirmDialog from "../component/ConfirmDailog";
 
 function Groups() {
+    // ---- left panel: group list ----
+    const [groups, setGroups] = useState([]);
+    const [listLoading, setListLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState("");
 
-    const [allgroups, setallgroups] = useState([])
-    const [loading, setloading] = useState(true)
-    const [selectedGroupId, setSelectedGroupId] = useState(null)
-    const [selectedGroup, setSelectedGroup] = useState(null)
-    const [groupLoading, setGroupLoading] = useState(false)
+    const [showAddDialog, setShowAddDialog] = useState(false);
+    const [newGroupName, setNewGroupName] = useState("");
+    const [creating, setCreating] = useState(false);
 
-    // Add Group dialog
-    const [showAddDialog, setShowAddDialog] = useState(false)
-    const [newName, setNewName] = useState("")
-    const [newDescription, setNewDescription] = useState("")
-    const [newPrompt, setNewPrompt] = useState("")
-    const [saving, setSaving] = useState(false)
+    const [selectedId, setSelectedId] = useState(null);
+    const [pendingDeleteId, setPendingDeleteId] = useState(null);
 
-    const getallGroups = async () => {
+    // ---- right panel: selected group detail ----
+    const [group, setGroup] = useState(null);
+    const [members, setMembers] = useState([]);
+    const [detailLoading, setDetailLoading] = useState(false);
+
+    const [editingName, setEditingName] = useState(false);
+    const [nameDraft, setNameDraft] = useState("");
+    const [savingName, setSavingName] = useState(false);
+
+    const [editingDescription, setEditingDescription] = useState(false);
+    const [descriptionDraft, setDescriptionDraft] = useState("");
+    const [savingDescription, setSavingDescription] = useState(false);
+
+    const [editingPrompt, setEditingPrompt] = useState(false);
+    const [promptDraft, setPromptDraft] = useState("");
+    const [savingPrompt, setSavingPrompt] = useState(false);
+
+    const [allContacts, setAllContacts] = useState([]);
+    const [showAddMember, setShowAddMember] = useState(false);
+    const [selectedContactId, setSelectedContactId] = useState("");
+    const [addingMember, setAddingMember] = useState(false);
+
+    // ---- load group list ----
+    const loadGroups = async () => {
         try {
-            const res = await getallgroups()
-            setallgroups(res.data.groups)
+            const res = await getallgroups();
+            setGroups(res.data.groups || []);
         } catch (err) {
-            toast.error(err.response?.data?.message || "Groups Not Fetched")
+            toast.error(err.response?.data?.message || "Failed to load groups");
         } finally {
-            setloading(false)
+            setListLoading(false);
         }
-    }
+    };
+
     useEffect(() => {
-        getallGroups()
-    }, [])
+        loadGroups();
+    }, []);
 
-    const getgroupbyID = async (id, name) => {
-        setSelectedGroupId(id);
-        setGroupLoading(true);
+    const filteredGroups = groups.filter((g) =>
+        g.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    // ---- load selected group's detail ----
+    const loadGroupDetail = async (id) => {
+        setDetailLoading(true);
         try {
-            const res = await getgroupbyid(id)
-            setSelectedGroup(res.data.group);
-        } catch (err) {
-            toast.error(err.response?.data?.message || `Group ${name} Not Fetched`)
-        } finally {
-            setGroupLoading(false);
-        }
-    }
+            const [groupRes, membersRes] = await Promise.all([
+                getgroupbyid(id),
+                getgroupmembers(id),
+            ]);
+            const g = groupRes.data.group;
+            setGroup(g);
+            setNameDraft(g.name);
+            setDescriptionDraft(g.description || "");
+            setPromptDraft(g.prompt || "");
 
-    const handleAddGroup = async () => {
-        if (!newName.trim()) {
+            const memberList = (membersRes.data.group?.contacts || []).map((gc) => gc.contact);
+            setMembers(memberList);
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to load group");
+        } finally {
+            setDetailLoading(false);
+        }
+    };
+
+    const selectGroup = (id) => {
+        setSelectedId(id);
+        setEditingName(false);
+        setEditingDescription(false);
+        setEditingPrompt(false);
+        setShowAddMember(false);
+        loadGroupDetail(id);
+    };
+
+    const refreshDetail = () => {
+        if (selectedId) loadGroupDetail(selectedId);
+    };
+
+    // ---- create group ----
+    const addGroup = async () => {
+        if (!newGroupName.trim()) {
             toast.error("Please enter a group name");
             return;
         }
-        setSaving(true)
+        setCreating(true);
         try {
-            const res = await creategroup(newName, newDescription, newPrompt)
-            toast.success(res.data.message || "Group Added Successfully")
-            setShowAddDialog(false)
-            setNewName("")
-            setNewDescription("")
-            setNewPrompt("")
-            getallGroups()
+            const res = await creategroup(newGroupName.trim());
+            toast.success(res.data.message || "Group created successfully");
+            setNewGroupName("");
+            setShowAddDialog(false);
+            await loadGroups();
+            if (res.data.group?.id) selectGroup(res.data.group.id);
         } catch (err) {
-            toast.error(err.response?.data?.message || "Group added Failed !")
+            toast.error(err.response?.data?.message || "Failed to create group");
         } finally {
-            setSaving(false)
+            setCreating(false);
         }
-    }
+    };
+
+    // ---- delete group ----
+    const confirmDelete = async () => {
+        const id = pendingDeleteId;
+        setPendingDeleteId(null);
+        try {
+            const res = await deletegroup(id);
+            toast.success(res.data.message || "Group deleted successfully");
+            setGroups((prev) => prev.filter((g) => g.id !== id));
+            if (selectedId === id) {
+                setSelectedId(null);
+                setGroup(null);
+            }
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to delete group");
+        }
+    };
+
+    // ---- name ----
+    const saveName = async () => {
+        if (!nameDraft.trim()) {
+            toast.error("Group name is required");
+            return;
+        }
+        setSavingName(true);
+        try {
+            const res = await updategroupname(group.id, nameDraft.trim());
+            toast.success(res.data.message || "Group name updated");
+            setEditingName(false);
+            await loadGroups();
+            refreshDetail();
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to update name");
+        } finally {
+            setSavingName(false);
+        }
+    };
+
+    // ---- description ----
+    const saveDescription = async () => {
+        setSavingDescription(true);
+        try {
+            const res = await setdescription(group.id, descriptionDraft.trim());
+            toast.success(res.data.message || "Description updated");
+            setEditingDescription(false);
+            refreshDetail();
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to update description");
+        } finally {
+            setSavingDescription(false);
+        }
+    };
+
+    const removeDescription = async () => {
+        try {
+            const res = await deletedescription(group.id);
+            toast.success(res.data.message || "Description removed");
+            setEditingDescription(false);
+            refreshDetail();
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to remove description");
+        }
+    };
+
+    // ---- system prompt ----
+    const savePrompt = async () => {
+        setSavingPrompt(true);
+        try {
+            const res = await setgroupprompt(group.id, promptDraft.trim());
+            toast.success(res.data.message || "System prompt updated");
+            setEditingPrompt(false);
+            refreshDetail();
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to update system prompt");
+        } finally {
+            setSavingPrompt(false);
+        }
+    };
+
+    const removePrompt = async () => {
+        try {
+            const res = await deletegroupprompt(group.id);
+            toast.success(res.data.message || "System prompt removed");
+            setEditingPrompt(false);
+            refreshDetail();
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to remove system prompt");
+        }
+    };
+
+    // ---- members ----
+    const toggleAddMember = async () => {
+        if (!showAddMember) {
+            try {
+                const res = await getcontacts();
+                setAllContacts(res.data.contacts || []);
+            } catch (err) {
+                setAllContacts([]);
+            }
+        }
+        setShowAddMember((prev) => !prev);
+        setSelectedContactId("");
+    };
+
+    const addMember = async () => {
+        if (!selectedContactId) {
+            toast.error("Please select a contact");
+            return;
+        }
+        setAddingMember(true);
+        try {
+            const res = await addcontacttogroup(Number(selectedContactId), group.name);
+            toast.success(res.data.message || "Contact added to group");
+            setSelectedContactId("");
+            setShowAddMember(false);
+            refreshDetail();
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to add contact");
+        } finally {
+            setAddingMember(false);
+        }
+    };
+
+    const removeMember = async (contactId) => {
+        try {
+            const res = await removecontactfromgroup(contactId, group.name);
+            toast.success(res.data.message || "Contact removed from group");
+            refreshDetail();
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to remove contact");
+        }
+    };
 
 
+    const [togglingMode, setTogglingMode] = useState(false);
+
+    // ---- AI mode toggle ----
+    const toggleAiMode = async () => {
+        setTogglingMode(true);
+        try {
+            const res = await tooglegroupmodebyid(group.id, !group.aiEnabled);
+            toast.success(res.data.message || "AI mode updated");
+            refreshDetail();
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to toggle AI mode");
+        } finally {
+            setTogglingMode(false);
+        }
+    };
+
+    const memberIds = new Set(members.map((m) => m.id));
+    const availableContacts = allContacts.filter((c) => !memberIds.has(c.id));
 
     return (
-        <div className={`main ${selectedGroupId ? "group-selected" : ""}`}>
-            <div className="group-section">
+        <div className="groups-page">
 
-                <div className="group-section-header">
+            {/* ---------- LEFT: group list ---------- */}
+            <div className="groups-left">
+                <div className="groups-left-header">
                     <h2>Groups</h2>
-                    <span className="group-count">{allgroups.length} groups</span>
+                    <button className="groups-add-btn" onClick={() => setShowAddDialog(true)}>+ Add</button>
                 </div>
 
-                {/* Add Group box */}
-                <div className="group-add-box">
-                    <button className="group-add-btn" onClick={() => setShowAddDialog(true)}>
-                        + Add Group
-                    </button>
+                <div className="groups-search-wrap">
+                    <input
+                        type="text"
+                        placeholder="Search groups..."
+                        className="groups-search"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <span className="groups-search-icon">🔍</span>
                 </div>
 
-                <div className="group-list">
-                    {loading ? (
-                        <p className="group-loading-text">Loading groups...</p>
-                    ) : allgroups.length === 0 ? (
-                        <p className="group-empty-text">No groups yet.</p>
+                <div className="groups-list">
+                    {listLoading ? (
+                        <div className="groups-list-empty">Loading...</div>
+                    ) : filteredGroups.length === 0 ? (
+                        <div className="groups-list-empty">
+                            {searchTerm ? "No groups match your search." : "No groups yet. Create one to get started."}
+                        </div>
                     ) : (
-                        allgroups.map((g) => (
+                        filteredGroups.map((g) => (
                             <div
                                 key={g.id}
-                                className={`group-item ${selectedGroupId === g.id ? "group-item-active" : ""}`}
-                                onClick={() => getgroupbyID(g.id, g.name)}
+                                className={`groups-list-item ${selectedId === g.id ? "active" : ""}`}
+                                onClick={() => selectGroup(g.id)}
                             >
-                                <div className="group-avatar">
-                                    {g.name.charAt(0).toUpperCase()}
+                                <div className="groups-list-item-info">
+                                    <span className="groups-list-item-name">{g.name}</span>
+                                    <span className="groups-list-item-sub">
+                                        {g.prompt ? "AI prompt set" : "No prompt"}
+                                    </span>
                                 </div>
-
-                                <div className="group-info">
-                                    <div className="group-name">{g.name}</div>
-                                    <div className="group-desc">
-                                        {g.description || "No description"}
-                                    </div>
-                                </div>
+                                <button
+                                    className="groups-list-item-delete"
+                                    onClick={(e) => { e.stopPropagation(); setPendingDeleteId(g.id); }}
+                                >
+                                    ✕
+                                </button>
                             </div>
                         ))
                     )}
                 </div>
-
             </div>
 
-            <div className="group-details">
-
-                {selectedGroupId && (
-                    <button
-                        className="group-back-btn"
-                        onClick={() => setSelectedGroupId(null)}
-                    >
-                        ← Back to Groups
-                    </button>
-                )}
-
-                {!selectedGroupId ? (
-                    <div className="group-details-empty">
-                        <div className="group-details-empty-icon">◎</div>
+            {/* ---------- RIGHT: selected group detail ---------- */}
+            <div className="groups-right">
+                {!selectedId ? (
+                    <div className="groups-right-empty">
+                        <div className="groups-right-empty-icon">👥</div>
                         <h3>Select a group</h3>
-                        <p>
-                            Select a group from the left to view its details.
-                        </p>
+                        <p>Choose a group from the list to view and edit its details.</p>
                     </div>
-                ) : groupLoading ? (
-                    <div className="group-details-empty">
-                        <div className="group-details-loader"></div>
-                        <p>Loading group details...</p>
-                    </div>
-                ) : selectedGroup ? (
-
-                    <div className="group-details-content">
-
-                        {/* Header */}
-                        <div className="group-details-header">
-
-                            <div className="group-details-title-area">
-
-                                <div className="group-details-avatar">
-                                    {selectedGroup.name?.charAt(0).toUpperCase()}
+                ) : detailLoading || !group ? (
+                    <div className="su-loading"><div className="spinner"></div></div>
+                ) : (
+                    <>
+                        {/* header */}
+                        <div className="groups-detail-header">
+                            {editingName ? (
+                                <div className="groups-inline-edit">
+                                    <input
+                                        type="text"
+                                        value={nameDraft}
+                                        onChange={(e) => setNameDraft(e.target.value)}
+                                        autoFocus
+                                        onKeyDown={(e) => e.key === "Enter" && saveName()}
+                                    />
+                                    <button className="groups-save-btn" onClick={saveName} disabled={savingName}>
+                                        {savingName ? "Saving..." : "Save"}
+                                    </button>
+                                    <button className="groups-cancel-btn" onClick={() => { setEditingName(false); setNameDraft(group.name); }}>
+                                        Cancel
+                                    </button>
                                 </div>
-
-                                <div>
-                                    <h2>{selectedGroup.name}</h2>
-                                    <span className="group-details-id">
-                                        Group ID: #{selectedGroup.id}
-                                    </span>
-                                </div>
-
-                            </div>
-
-                            <div className="group-status">
-                                Active
-                            </div>
-
+                            ) : (
+                                <>
+                                    <h2>{group.name}</h2>
+                                    <div className="groups-detail-header-actions">
+                                        <button
+                                            className={`groups-ai-toggle-btn ${group.aiEnabled ? "on" : "off"}`}
+                                            onClick={toggleAiMode}
+                                            disabled={togglingMode}
+                                        >
+                                            <span className="groups-ai-toggle-dot" />
+                                            {togglingMode ? "Updating..." : group.aiEnabled ? "AI On" : "AI Off"}
+                                        </button>
+                                        <button className="groups-edit-btn" onClick={() => setEditingName(true)}>Rename</button>
+                                        <button className="groups-delete-btn" onClick={() => setPendingDeleteId(group.id)}>Delete Group</button>
+                                    </div>
+                                </>
+                            )}
                         </div>
 
-
-                        {/* Description */}
-                        <div className="group-detail-section">
-
-                            <div className="group-detail-section-title">
-                                <span>Group Information</span>
+                        {/* description */}
+                        <div className="groups-section">
+                            <div className="groups-section-header">
+                                <h3>Description</h3>
+                                <button className="groups-section-btn" onClick={() => setEditingDescription((p) => !p)}>
+                                    {editingDescription ? "Close" : group.description ? "Edit" : "+ Add"}
+                                </button>
                             </div>
 
-                            <div className="group-info-grid">
-
-                                <div className="group-info-box">
-                                    <span className="group-info-label">
-                                        Group ID
-                                    </span>
-
-                                    <span className="group-info-value">
-                                        #{selectedGroup.id}
-                                    </span>
+                            {editingDescription ? (
+                                <div className="groups-section-edit">
+                                    <textarea
+                                        value={descriptionDraft}
+                                        onChange={(e) => setDescriptionDraft(e.target.value)}
+                                        placeholder="Describe what this group is for..."
+                                        rows={3}
+                                        autoFocus
+                                    />
+                                    <div className="groups-section-actions">
+                                        <button className="groups-save-btn" onClick={saveDescription} disabled={savingDescription}>
+                                            {savingDescription ? "Saving..." : "Save"}
+                                        </button>
+                                        <button className="groups-cancel-btn" onClick={() => { setEditingDescription(false); setDescriptionDraft(group.description || ""); }}>
+                                            Cancel
+                                        </button>
+                                        {group.description && (
+                                            <button className="groups-remove-link" onClick={removeDescription}>Remove</button>
+                                        )}
+                                    </div>
                                 </div>
-
-
-                                <div className="group-info-box">
-                                    <span className="group-info-label">
-                                        Group Name
-                                    </span>
-
-                                    <span className="group-info-value">
-                                        {selectedGroup.name || "-"}
-                                    </span>
-                                </div>
-
-
-                                <div className="group-info-box group-info-full">
-                                    <span className="group-info-label">
-                                        Description
-                                    </span>
-
-                                    <span className="group-info-value">
-                                        {selectedGroup.description || "No description provided"}
-                                    </span>
-                                </div>
-
-                            </div>
-
+                            ) : (
+                                <p className={group.description ? "groups-text" : "groups-text-empty"}>
+                                    {group.description || "No description set."}
+                                </p>
+                            )}
                         </div>
 
-
-                        <div className="group-detail-section">
-
-                            <div className="group-detail-section-title">
-                                <span>AI Prompt</span>
+                        {/* system prompt */}
+                        <div className="groups-section">
+                            <div className="groups-section-header">
+                                <h3>System Prompt</h3>
+                                <button className="groups-section-btn" onClick={() => setEditingPrompt((p) => !p)}>
+                                    {editingPrompt ? "Close" : group.prompt ? "Edit" : "+ Add"}
+                                </button>
                             </div>
 
-                            <div className="group-prompt-box">
+                            {editingPrompt ? (
+                                <div className="groups-section-edit">
+                                    <textarea
+                                        value={promptDraft}
+                                        onChange={(e) => setPromptDraft(e.target.value)}
+                                        placeholder="How should the AI respond to contacts in this group?"
+                                        rows={6}
+                                        autoFocus
+                                    />
+                                    <div className="groups-section-actions">
+                                        <button className="groups-save-btn" onClick={savePrompt} disabled={savingPrompt}>
+                                            {savingPrompt ? "Saving..." : "Save"}
+                                        </button>
+                                        <button className="groups-cancel-btn" onClick={() => { setEditingPrompt(false); setPromptDraft(group.prompt || ""); }}>
+                                            Cancel
+                                        </button>
+                                        {group.prompt && (
+                                            <button className="groups-remove-link" onClick={removePrompt}>Remove</button>
+                                        )}
+                                    </div>
+                                </div>
+                            ) : (
+                                <p className={group.prompt ? "groups-text groups-prompt-text" : "groups-text-empty"}>
+                                    {group.prompt || "No system prompt set — this group has no custom AI behavior."}
+                                </p>
+                            )}
+                        </div>
 
-                                {selectedGroup.prompt ? (
-                                    <p>{selectedGroup.prompt}</p>
+                        {/* members */}
+                        <div className="groups-section">
+                            <div className="groups-section-header">
+                                <h3>Members ({members.length})</h3>
+                                <button className="groups-section-btn" onClick={toggleAddMember}>
+                                    {showAddMember ? "Close" : "+ Add Member"}
+                                </button>
+                            </div>
+
+                            {showAddMember && (
+                                <div className="groups-section-edit groups-add-member-row">
+                                    <select
+                                        value={selectedContactId}
+                                        onChange={(e) => setSelectedContactId(e.target.value)}
+                                    >
+                                        <option value="">Select a contact</option>
+                                        {availableContacts.map((c) => (
+                                            <option key={c.id} value={c.id}>{c.name || c.waId}</option>
+                                        ))}
+                                    </select>
+                                    <button className="groups-save-btn" onClick={addMember} disabled={addingMember}>
+                                        {addingMember ? "Adding..." : "Add"}
+                                    </button>
+                                    <button className="groups-cancel-btn" onClick={toggleAddMember}>Cancel</button>
+                                </div>
+                            )}
+
+                            <div className="groups-members-row">
+                                {members.length === 0 ? (
+                                    <p className="groups-text-empty">No members in this group yet.</p>
                                 ) : (
-                                    <span className="group-prompt-empty">
-                                        No custom AI prompt configured for this group.
-                                    </span>
+                                    members.map((m) => (
+                                        <span className="groups-member-pill" key={m.id}>
+                                            {m.name || m.waId}
+                                            <button onClick={() => removeMember(m.id)}>✕</button>
+                                        </span>
+                                    ))
                                 )}
-
                             </div>
-
                         </div>
-
-
-                        {/* Dates */}
-                        <div className="group-detail-section">
-
-                            <div className="group-detail-section-title">
-                                <span>System Information</span>
-                            </div>
-
-                            <div className="group-info-grid">
-
-                                <div className="group-info-box">
-                                    <span className="group-info-label">
-                                        Created At
-                                    </span>
-
-                                    <span className="group-info-value">
-                                        {selectedGroup.createdAt
-                                            ? new Date(selectedGroup.createdAt).toLocaleString()
-                                            : "-"
-                                        }
-                                    </span>
-                                </div>
-
-
-                                <div className="group-info-box">
-                                    <span className="group-info-label">
-                                        Last Updated
-                                    </span>
-
-                                    <span className="group-info-value">
-                                        {selectedGroup.updatedAt
-                                            ? new Date(selectedGroup.updatedAt).toLocaleString()
-                                            : "-"
-                                        }
-                                    </span>
-                                </div>
-
-                            </div>
-
-                        </div>
-
-
-                        <div className="group-detail-actions">
-
-                            <button className="group-action-btn">
-                                Edit Group
-                            </button>
-
-                            <button className="group-action-btn danger">
-                                Delete Group
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                ) : null}
-
+                    </>
+                )}
             </div>
 
+            {/* create-group dialog */}
             {showAddDialog && (
                 <div className="overlay" onClick={() => setShowAddDialog(false)}>
-                    <div className="add-group-dialog" onClick={(e) => e.stopPropagation()}>
-                        <h3 className="dialog-title">Add Group</h3>
-
-                        <div className="dialog-field">
-                            <label className="dialog-label">Group Name</label>
-                            <input
-                                type="text"
-                                placeholder="e.g. VIP Customers"
-                                className="dialog-input"
-                                value={newName}
-                                onChange={(e) => setNewName(e.target.value)}
-                            />
-                        </div>
-
-                        <div className="dialog-field">
-                            <label className="dialog-label">Description</label>
-                            <textarea
-                                placeholder="What is this group for? (optional)"
-                                className="dialog-textarea"
-                                value={newDescription}
-                                onChange={(e) => setNewDescription(e.target.value)}
-                            />
-                        </div>
-
-                        <div className="dialog-field">
-                            <label className="dialog-label">AI Prompt</label>
-                            <textarea
-                                placeholder="Custom instructions for the bot in this group (optional)"
-                                className="dialog-textarea"
-                                value={newPrompt}
-                                onChange={(e) => setNewPrompt(e.target.value)}
-                            />
-                        </div>
-
-                        <div className="dialog-actions">
-                            <button className="dialog-cancel-btn" onClick={() => setShowAddDialog(false)}>Cancel</button>
-                            <button className="dialog-save-btn" onClick={handleAddGroup}>
-                                {saving ? "Saving..." : "Save Group"}
+                    <div className="groups-add-dialog" onClick={(e) => e.stopPropagation()}>
+                        <h3>Add Group</h3>
+                        <input
+                            type="text"
+                            placeholder="Group Name"
+                            value={newGroupName}
+                            onChange={(e) => setNewGroupName(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && addGroup()}
+                            autoFocus
+                        />
+                        <div className="groups-section-actions">
+                            <button className="groups-cancel-btn" onClick={() => setShowAddDialog(false)}>Cancel</button>
+                            <button className="groups-save-btn" onClick={addGroup} disabled={creating}>
+                                {creating ? "Saving..." : "Save Group"}
                             </button>
                         </div>
                     </div>
                 </div>
             )}
 
+            <ConfirmDialog
+                open={pendingDeleteId !== null}
+                message="Are you sure you want to delete this group? This also removes all its members."
+                onConfirm={confirmDelete}
+                onCancel={() => setPendingDeleteId(null)}
+            />
+
         </div>
-
-
-    )
-
+    );
 }
 
 export default Groups;
