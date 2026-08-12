@@ -41,14 +41,12 @@ function ProductView() {
     const getKeyword = async (id) => {
         try {
             const res = await getkeyword(id);
-            setKeywords(res.data.keywords || []);
+            setKeywords(res.data.productKeywords || []);
         } catch (err) {
             toast.error(err.response?.data?.message || "Failed to load keywords");
         }
     };
 
-    // toggles the keyword-input panel open/closed on every click,
-    // same pattern as the Media "+ Add Media" button
     const toggleKeywordInput = () => {
         setShowKeywordInput((prev) => !prev);
         setNewKeyword("");
@@ -62,8 +60,6 @@ function ProductView() {
         try {
             const res = await addkeyword(productId, newKeyword.trim());
 
-            // if the server sends back the full updated list, use it directly.
-            // otherwise, add the new keyword to our current local list ourselves.
             if (Array.isArray(res.data.keywords)) {
                 setKeywords(res.data.keywords);
             } else {
@@ -81,29 +77,22 @@ function ProductView() {
     const getMedia = async (id) => {
         try {
             const res = await getmedia(id);
-            setMedia(res.data.media || []);
+            setMedia(res.data.productMedia|| []);
         } catch (err) {
             toast.error(err.response?.data?.message || "Failed to load media");
         }
     };
 
-    const uploadMedia = async (productId) => {
-        if (!selectedFile) {
+   const uploadMedia = async (productId) => {
+        if (!selectedFile) {  
             toast.error("Please select a file!");
             return;
         }
+        console.log("product.category is:", product.category);
         setUploading(true);
         try {
-            const res = await uploadmedia(productId, selectedFile);
-
-            // same logic as keywords: prefer the server's full updated list,
-            // fall back to appending the single new item ourselves
-            if (Array.isArray(res.data.media)) {
-                setMedia(res.data.media);
-            } else if (res.data.newMedia) {
-                setMedia((prev) => [...prev, res.data.newMedia]);
-            }
-
+            const res = await uploadmedia(productId, selectedFile, product.category?.name);
+            await getMedia(productId);
             setSelectedFile(null);
             setShowMediaUpload(false);
             toast.success(res.data.message || "Media uploaded successfully!");
@@ -114,7 +103,6 @@ function ProductView() {
         }
     };
 
-    // toggles the media-upload panel open/closed on every click
     const toggleMediaUpload = () => {
         setShowMediaUpload((prev) => !prev);
         setSelectedFile(null);
@@ -144,8 +132,14 @@ function ProductView() {
     };
 
 
-    const getMediaUrl = (m) => m.url || m.file_url || m.media_url || m.path || "";
-    const getMediaType = (m) => m.type || m.mime_type || m.content_type || "";
+    const getMediaUrl = (m) => {
+        const path = m.filePath || m.url || m.file_url || m.media_url || m.path || "";
+        if (!path) return "";
+        
+        const backendOrigin = import.meta.env.VITE_API_URL.replace(/\/api\/v1\/?$/, "");
+        return path.startsWith("http") ? path : `${backendOrigin}/${path.replace(/^\/+/, "")}`;
+    };
+    const getMediaType = (m) => (m.type || m.mime_type || m.content_type || "").toLowerCase();
 
     if (loading) return <div className="su-loading"><div className="spinner"></div></div>;
 
@@ -166,7 +160,7 @@ function ProductView() {
                     <div className="pv-info-item"><span className="pv-info-label">Name</span><span className="pv-info-value">{product.name}</span></div>
                     <div className="pv-info-item"><span className="pv-info-label">Price</span><span className="pv-info-value">{product.price}</span></div>
                     <div className="pv-info-item"><span className="pv-info-label">Description</span><span className="pv-info-value">{product.description}</span></div>
-                    <div className="pv-info-item"><span className="pv-info-label">Category</span><span className="pv-info-value">{product.category}</span></div>
+                    <div className="pv-info-item"><span className="pv-info-label">Category</span><span className="pv-info-value">{product.category?.name}</span></div>
                 </div>
             </div>
 

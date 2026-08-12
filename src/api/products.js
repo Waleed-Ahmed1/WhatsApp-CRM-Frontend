@@ -24,11 +24,12 @@ export const getkeyword = (id) =>{
     return api.get(`/products/get-product-keywords/${id}`)
 }
 
-export const uploadmedia = (id,file) => {
+export const uploadmedia = (id, file, category) => {
     const formData = new FormData();
-    formData.append("file", file);
-    return api.post(`/products/${id}/media`,{formData})
-}
+    formData.append("category", category || "general");   // fields before file
+    formData.append("media", file);
+    return api.post(`/products/${id}/media`, formData);
+};
 
 export const getmedia = (id) => {
     return api.get(`/products/get-product-media/${id}`)

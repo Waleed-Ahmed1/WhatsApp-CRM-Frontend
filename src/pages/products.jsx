@@ -47,7 +47,8 @@ function Products() {
             const res = await getcategories()
             setgetcategory(res.data.categories || [])
         } catch (err) {
-            setgetcategory(["Categories not Loaded Sucessfully"])
+            setgetcategory([])
+            toast.error("Failed to load categories")
         }
     }
 
@@ -105,13 +106,6 @@ function Products() {
         }
     }
 
-    // {!loading && products.length === 0 && (
-    //     <div className="contacts-empty">
-    //         No Products found.
-    //     </div>
-    // )}
-
-
 
     if (productloading) {
         return <div className="su-loading"><div className="spinner"></div></div>;
@@ -167,7 +161,7 @@ function Products() {
                                     <td className="product-name-cell">{p.name}</td>
                                     <td className="product-desc-cell">{p.description}</td>
                                     <td>{p.price}</td>
-                                    <td>{p.category}</td>
+                                    <td>{p.category?.name}</td>
 
                                     <td className="product-actions-cell">
                                         <button className="more-btn" onClick={() => setOpenMenuId(openMenuId === p.id ? null : p.id)}>⋮</button>
@@ -211,8 +205,8 @@ function Products() {
                             <select className="dialog-select" value={category} onChange={(e) => setcategory(e.target.value)}>
                                 <option value="">Select Category</option>
                                 {getcategory.map((cat) => (
-                                    <option key={cat} value={cat}>
-                                        {cat}
+                                    <option key={cat.id} value={cat.name}>
+                                        {cat.name}
                                     </option>
                                 ))}
                             </select>

@@ -15,3 +15,11 @@ export const savetoken = (token) =>{
 export const gettoken = () =>{
     return api.get('settings/get-meta-wa-token')
 }
+
+export const setsystemprompt = () => {
+    return api.post('settings/set-systemprompt')
+}
+
+export const getsystemprompt = () => {
+    return api.get('settings/get-systemprompt')
+}
