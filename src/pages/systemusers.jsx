@@ -72,7 +72,7 @@ function SystemUsers() {
                                     <td>{u.id}</td>
                                     <td>{u.name}</td>
                                     <td className="su-email">{u.email}</td>
-                                    <td><span className="su-role-badge">{u.role}</span></td>
+                                    <td><span className="su-role-badge">{u.role}Admin</span></td>
                                     <td className="su-action">
                                         <button className="su-delete-btn" onClick={() => handleDelete(u.id)}>Delete</button>
                                     </td>

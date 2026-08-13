@@ -1,19 +1,7 @@
 import { useState, useEffect } from "react";
 import "../css/groups.css";
-import {
-    getallgroups,
-    getgroupbyid,
-    getgroupmembers,
-    creategroup,
-    deletegroup,
-    addcontacttogroup,
-    removecontactfromgroup,
-    setdescription,
-    deletedescription,
-    setgroupprompt,
-    deletegroupprompt,
-    updategroupname,
-    tooglegroupmodebyid
+import { getallgroups, getgroupbyid, getgroupmembers, creategroup, deletegroup, addcontacttogroup, removecontactfromgroup, setdescription, deletedescription, setgroupprompt, deletegroupprompt,
+    updategroupname, tooglegroupmodebyid
 } from "../api/groups";
 import { getcontacts } from "../api/contacts";
 import toast from "react-hot-toast";
@@ -293,7 +281,7 @@ function Groups() {
                     <button className="groups-add-btn" onClick={() => setShowAddDialog(true)}>+ Add</button>
                 </div>
 
-                <div className="groups-search-wrap">
+                {/* <div className="groups-search-wrap">
                     <input
                         type="text"
                         placeholder="Search groups..."
@@ -302,7 +290,7 @@ function Groups() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                     <span className="groups-search-icon">🔍</span>
-                </div>
+                </div> */}
 
                 <div className="groups-list">
                     {listLoading ? (

@@ -1,6 +1,145 @@
 /* ================================
+   LIVE CHAT PAGE — WhatsApp color match
+================================ */
+
+.livechat-page {
+    background: #111b21;
+}
+
+.chat-list {
+    background: #111b21;
+    border-right: 1px solid #222d34;
+}
+
+.chat-list-header {
+    background: #202c33;
+    border-bottom: none;
+}
+
+.chat-header-title h2 {
+    color: #e9edef;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 400;
+    font-size: 19px;
+}
+
+.online-status {
+    color: #8696a0;
+}
+
+.status-dot {
+    background: #00a884;
+}
+
+.chat-search-btn {
+    color: #8696a0;
+}
+
+.chat-search-btn:hover {
+    background: #202c33;
+}
+
+.chat-search {
+    background: #202c33;
+    border: none;
+    margin: 8px 12px 8px;
+    border-radius: 8px;
+    color: #8696a0;
+}
+
+.chat-search input {
+    color: #d1d7db;
+}
+
+.chat-search input::placeholder {
+    color: #8696a0;
+}
+
+/* ---- avatar: WhatsApp uses a mid-grey circle with a lighter grey icon ---- */
+.chat-avatar {
+    background: #6a7175;
+    color: #cfd4d6;
+    font-size: 20px;
+}
+
+.selected-avatar {
+    background: #6a7175;
+    color: #cfd4d6;
+}
+
+.avatar-online {
+    background: #00a884;
+    border: 2px solid #111b21;
+}
+
+.chat-item {
+    border-bottom: none;
+}
+
+.chat-item:hover {
+    background: #202c33;
+}
+
+.chat-item.active-chat {
+    background: #2a3942;
+    border-left: none;
+}
+
+.chat-name {
+    color: #e9edef;
+    font-weight: 400;
+}
+
+.chat-time {
+    color: #8696a0;
+}
+
+.chat-last-message {
+    color: #8696a0;
+}
+
+.unread-count {
+    background: #00a884;
+    color: #0b141a;
+}
+
+.chat-window {
+    background: #0b141a;
+}
+
+.chat-window-header {
+    background: #202c33;
+    border-bottom: none;
+}
+
+.selected-user-info h3 {
+    color: #e9edef;
+    font-weight: 400;
+}
+
+.selected-user-info span {
+    color: #8696a0;
+}
+
+.chat-actions button {
+    color: #8696a0;
+}
+
+.chat-actions button:hover {
+    background: transparent;
+    color: #d1d7db;
+}
+
+
+
+
+/* ================================
    LIVE CHAT PAGE
 ================================ */
+
+
+
+
 
 .livechat-page {
     width: 100%;
@@ -493,7 +632,7 @@
 .messages-area {
     flex: 1;
 
-    padding: 25px 7%;
+    padding: 25px 5%;
 
     overflow-y: auto;
 
@@ -557,6 +696,7 @@
 }
 
 
+
 /* ================================
    MESSAGE BUBBLE — unchanged (original)
 ================================ */
@@ -573,17 +713,19 @@
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
 }
 
+
 .received .message-bubble {
     background: #202c33;
-
     border-top-left-radius: 2px;
 }
 
-.sent .message-bubble {
-    background: #005c4b;
 
+
+.sent .message-bubble {
+    background: #005c4b;   /* WhatsApp's real dark-mode outgoing green */
     border-top-right-radius: 2px;
 }
+
 
 .message-bubble p {
     margin: 0;
@@ -614,23 +756,31 @@
 }
 
 
+
+.received .message-bubble {
+    background: #202c33;
+    border-top-left-radius: 2px;
+}
+
+
+
 /* ================================
    MESSAGE INPUT — unchanged (original)
 ================================ */
 
 .message-input-area {
-    min-height: 64px;
+    min-height: 56px;
 
-    padding: 10px 15px;
+    padding: 8px 12px;
 
     display: flex;
     align-items: center;
 
-    gap: 8px;
+    gap: 4px;
 
-    background: #202c33;
+    background: #202c33;   /* outer bar background — matches header/sidebar tone */
 
-    border-top: 1px solid #2a3942;
+    border-top: none;
 }
 
 
@@ -643,18 +793,20 @@
 
     height: 42px;
 
-    padding: 0 15px;
+    padding: 0 12px;
 
     border: none;
     outline: none;
 
-    border-radius: 8px;
+    border-radius: 21px;
 
-    background: #2a3942;
+    background: #2a3942;   /* the pill itself — the dark rounded capsule from your screenshot */
 
     color: #e9edef;
 
-    font-size: 14px;
+    font-size: 15px;
+
+    margin: 0 4px;
 }
 
 .message-input-area input::placeholder {
@@ -749,13 +901,56 @@
     .chat-list {
         width: 100%;
         min-width: 100%;
+        display: flex;
     }
 
     .chat-window {
         display: none;
+        width: 100%;
+
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 10;
+    }
+
+    /* When a contact is selected on mobile: hide list, show full-screen chat */
+    .livechat-page.mobile-chat-open .chat-list {
+        display: none;
+    }
+
+    .livechat-page.mobile-chat-open .chat-window {
+        display: flex;
     }
 }
 
+/* Back button — hidden on desktop, shown only on mobile */
+.chat-back-btn {
+    display: none;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: #e9edef;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.chat-back-btn:hover {
+    background: #232838;
+}
+
+@media (max-width: 700px) {
+    .chat-back-btn {
+        display: flex;
+    }
+}
 
 /* ================================
    MESSAGE TICKS (sent / delivered / read)
@@ -780,4 +975,155 @@
 /* double blue tick — read */
 .tick-read {
     color: #53bdeb;
+}
+
+/* ================================
+   EMPTY CHAT WINDOW STATE
+================================ */
+
+.chat-window-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    color: #8696a0;
+    text-align: center;
+    padding: 40px;
+}
+
+.chat-window-empty h2 {
+    color: #e9edef;
+    font-weight: 300;
+    font-size: 26px;
+    margin: 0;
+}
+
+.chat-window-empty p {
+    font-size: 13px;
+    margin: 0;
+    max-width: 320px;
+}
+
+.no-messages-text {
+    text-align: center;
+    color: #8696a0;
+    font-size: 13px;
+    margin-top: 40px;
+}
+
+/* ================================
+   EMPTY CHAT LIST STATE
+================================ */
+
+.chat-list-empty {
+    flex: 1;
+    height: 100%;          /* ← add this */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 40px 24px;
+    color: #6b7280;
+    text-align: center;
+}
+.chat-list-empty svg {
+    color: #232838;
+}
+
+.chat-list-empty p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    max-width: 220px;
+}
+
+.selected-user-info span {
+    color: #8696a0;
+    font-size: 12px;
+}
+
+
+.message-media-image,
+.message-media-video {
+    max-width: 260px;
+    max-height: 260px;
+    border-radius: 6px;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.message-media-audio {
+    max-width: 240px;
+    margin-bottom: 6px;
+}
+
+.message-media-doc {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #53bdeb;
+    text-decoration: none;
+    font-size: 13px;
+    margin-bottom: 6px;
+}
+
+.message-media-doc:hover {
+    text-decoration: underline;
+}
+
+.message-input-area-wrap {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.selected-file-pill {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 0 12px 6px;
+    padding: 6px 12px;
+    background: #2a3942;
+    border-radius: 8px;
+    color: #e9edef;
+    font-size: 12px;
+}
+
+.selected-file-pill button {
+    background: transparent;
+    border: none;
+    color: #f87171;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.emoji-picker {
+    position: absolute;
+    bottom: 60px;
+    left: 12px;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+    background: #202c33;
+    border: 1px solid #232838;
+    border-radius: 10px;
+    padding: 10px;
+    z-index: 20;
+}
+
+.emoji-picker button {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+}
+
+.emoji-picker button:hover {
+    background: #2a3942;
 }

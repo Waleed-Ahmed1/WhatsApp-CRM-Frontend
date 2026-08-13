@@ -25,23 +25,23 @@
 .su-error-wrap { width: 100%; display: flex; align-items: center; justify-content: center; margin-top: 20px; }
 .su-error-text { color: red; font-family: monospace; font-size: 16px; }
 
-/* .su-table-wrapper {
+/* ==========================================================================
+   Responsive — tablet
+   ========================================================================== */
+
+.su-table-wrapper {
     width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
 }
 
-.su-table {
-    min-width: 700px;
-}
-
 @media (max-width: 992px) {
     .su-page {
-        padding: 18px;
+        padding: 16px;
     }
 
     .su-title {
-        font-size: 18px;
+        font-size: 17px;
     }
 
     .su-subtitle {
@@ -50,16 +50,56 @@
 
     .su-table th,
     .su-table td {
-        padding: 12px;
+        padding: 11px;
         font-size: 13px;
-        white-space: nowrap;
     }
 }
 
-@media (max-width: 768px) {
+/* ==========================================================================
+   Responsive — phone (card layout instead of a cramped table)
+   ========================================================================== */
 
-    .su-table {
-        min-width: 100%;
+@media (max-width: 640px) {
+    .su-page {
+        padding: 10px;
+    }
+
+    .su-header {
+        margin-bottom: 14px;
+    }
+
+    .su-title {
+        font-size: 15px;
+        letter-spacing: -0.2px;
+    }
+
+    .su-subtitle {
+        font-size: 10.5px;
+        margin-top: 2px;
+    }
+
+    .su-badge {
+        font-size: 10.5px;
+        padding: 5px 10px;
+        gap: 5px;
+        white-space: nowrap;
+    }
+
+    .su-badge-dot {
+        width: 6px;
+        height: 6px;
+    }
+
+    /* the outer card no longer needs a bounding box once rows become cards
+       of their own — this stops a "box inside a box" look */
+    .su-card {
+        background: transparent;
+        border: none;
+        border-radius: 0;
+    }
+
+    .su-table-wrapper {
+        overflow-x: visible;
     }
 
     .su-table thead {
@@ -75,11 +115,16 @@
     }
 
     .su-table tr {
-        background: #141824;
+        background: linear-gradient(180deg, #161b28 0%, #131722 100%);
         border: 1px solid #232838;
         border-radius: 10px;
-        margin-bottom: 16px;
-        padding: 10px;
+        margin-bottom: 10px;
+        padding: 4px 12px;
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.02) inset;
+    }
+
+    .su-table tr:last-child {
+        margin-bottom: 0;
     }
 
     .su-table td {
@@ -88,12 +133,22 @@
         align-items: center;
         text-align: right;
         border: none;
-        padding: 10px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        padding: 9px 0;
+        font-size: 12.5px;
+    }
+
+    .su-table td:last-child {
+        border-bottom: none;
     }
 
     .su-table td::before {
+        font-family: sans-serif;
         font-weight: 600;
-        color: #9aa0ac;
+        font-size: 10.5px;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        color: #5a6274;
         text-align: left;
     }
 
@@ -101,5 +156,62 @@
     .su-table td:nth-child(2)::before { content: "Name"; }
     .su-table td:nth-child(3)::before { content: "Email"; }
     .su-table td:nth-child(4)::before { content: "Role"; }
-    .su-table td:nth-child(5)::before { content: "Action"; }
-} */
+    .su-table td:nth-child(5)::before { content: ""; }
+
+    .su-table td.su-email {
+        font-size: 12px;
+        color: #8b93a3;
+    }
+
+    .su-table td.su-action {
+        padding-top: 10px;
+        justify-content: flex-end;
+    }
+
+    .su-role-badge {
+        font-size: 10.5px;
+        padding: 2px 9px;
+    }
+
+    .su-delete-btn {
+        width: 100%;
+        max-width: 130px;
+        padding: 7px 0;
+        font-size: 12px;
+        font-weight: 600;
+        border: 1px solid rgba(248, 113, 113, 0.25);
+        border-radius: 7px;
+    }
+
+    .su-delete-btn:active {
+        background: rgba(248, 113, 113, 0.2);
+    }
+
+    .su-error-text {
+        font-size: 13px;
+    }
+}
+
+/* ==========================================================================
+   Responsive — very small phones
+   ========================================================================== */
+
+@media (max-width: 380px) {
+    .su-page {
+        padding: 8px;
+    }
+
+    .su-title {
+        font-size: 14px;
+    }
+
+    .su-table tr {
+        padding: 2px 10px;
+        border-radius: 9px;
+    }
+
+    .su-table td {
+        font-size: 12px;
+        padding: 8px 0;
+    }
+}

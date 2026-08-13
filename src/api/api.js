@@ -40,4 +40,39 @@ api.interceptors.response.use(
     }
 );
 
+
+// Handle expired access token
+api.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        const originalRequest = error.config;
+        // Access token expired
+        if (
+            error.response?.status === 401 &&
+            !originalRequest._retry &&
+            !originalRequest.url.includes("/auth/refresh")
+        ) {
+            originalRequest._retry = true;
+            try {
+                const response = await api.post("/auth/refresh");
+                const newAccessToken =
+                    response.data.accessToken;
+                localStorage.setItem("accessToken", newAccessToken);
+                originalRequest.headers.Authorization =
+                    `Bearer ${newAccessToken}`;
+
+                return api(originalRequest);
+            } catch (refreshError) {
+                localStorage.removeItem("accessToken");
+                window.location.href = "/login";
+                return Promise.reject(refreshError);
+            }
+        }
+        return Promise.reject(error);
+    }
+);
+
+
 export default api;
+
+
