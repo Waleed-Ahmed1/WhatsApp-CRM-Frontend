@@ -5,7 +5,7 @@ const api = axios.create({
     withCredentials: true
 })
 
-// attach token to every request
+// attach token to every request, so if any request comes wihtout the token cant be right to acess any things
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem("token");
     if (token) config.headers.Authorization = `Bearer ${token}`;
