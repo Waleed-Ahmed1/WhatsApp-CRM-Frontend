@@ -358,19 +358,19 @@
 
     /* AI toggle */
     .ai-toggle-btn {
-        width: 100%;
+        width: 30%;
         justify-content: center;
         padding: 7px 12px 7px 7px;
     }
 
     .ai-toggle-track {
-        width: 34px;
-        height: 18px;
+        width: 30px;
+        height: 16px;
     }
 
     .ai-toggle-thumb {
-        width: 14px;
-        height: 14px;
+        width: 13px;
+        height: 13px;
         top: 2px;
         left: 2px;
     }
