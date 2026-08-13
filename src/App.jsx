@@ -21,7 +21,55 @@ import Broadcast from "./pages/broadcast.jsx";
 function App() {
     return (
         <>
-            <Toaster position="right-bottom" reverseOrder={false} toastOptions={{ duration: 4000, style: { margin: "0px 30px 30px 0px", background: "#141824", color: "#fff", fontFamily: "'Poppins', sans-serif", border: "1px solid #232838", borderRadius: "10px", padding: "14px 16px" }, success: { icon: <FaCircleCheck color="#25d366" size={20} /> }, error: { icon: <MdErrorOutline color="#ef4444" size={20} /> } }} />
+            <Toaster
+                position="right-bottom"
+                reverseOrder={false}
+                toastOptions={{
+                    duration: 4000,
+
+                    style: {
+                        margin: "0 20px 20px 0",
+                        background: "#FFFFFF",
+                        color: "#1F2937",
+                        fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
+                        border: "1px solid #E5E7EB",
+                        borderRadius: "14px",
+                        padding: "14px 16px",
+                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+                        fontSize: "14px",
+                        fontWeight: "500",
+                        minWidth: "300px",
+                    },
+
+                    success: {
+                        icon: (
+                            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#EAF7F4]">
+                                <FaCircleCheck
+                                    color="#0B6F60"
+                                    size={17}
+                                />
+                            </div>
+                        ),
+                        style: {
+                            borderLeft: "4px solid #0B6F60",
+                        },
+                    },
+
+                    error: {
+                        icon: (
+                            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#FEE2E2]">
+                                <MdErrorOutline
+                                    color="#DC2626"
+                                    size={19}
+                                />
+                            </div>
+                        ),
+                        style: {
+                            borderLeft: "4px solid #DC2626",
+                        },
+                    },
+                }}
+            />
 
             <Routes>
                 <Route path="/" element={<Login />} />
