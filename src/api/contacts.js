@@ -1,5 +1,5 @@
 import api from "./api";
 
 export const getcontacts = () => {
-    return api.post("/contacts/get-all-contacts")
+    return api.get("/contacts/get-all-contacts")
 }
