@@ -41,7 +41,7 @@ export const getgroqapikey = () => {
 };
 
 export const setOpenAiKey = (key) => {
-    return api.patch('/settings/set-groq-open-ai-key', { key });
+    return api.patch('/settings/set-groq-open-ai-key',{ key });
 };
 
 export const getOpenAiKey = () => {

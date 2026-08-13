@@ -232,7 +232,7 @@ function Settings() {
                     <h3 className="settings-card-title">Groq API Key</h3>
                     <p className="settings-hint">Your Groq API Key.</p>
 
-                    <input type="password" value={apikey} onChange={(e) => setApiKey(e.target.value)} placeholder="gsk_xxxxxxxxxxxxxxxxx" className="settings-input" />
+                    <input type="password" value={apikey} onChange={(e) => setApiKey(e.target.value)} placeholder="Groq API Key" className="settings-input" />
 
                     <button className="settings-save-btn" onClick={handleApiKey} disabled={savingapiKey}>
                         {savingapiKey ? "Saving..." : "Save Groq API Key"}
@@ -243,7 +243,7 @@ function Settings() {
                     <h3 className="settings-card-title">Groq OpenAI API Key</h3>
                     <p className="settings-hint">Your Groq key for the OpenAI-compatible API.</p>
 
-                    <input type="password" value={openaiKey} onChange={(e) => setOpenaiKey(e.target.value)} placeholder="gsk_xxxxxxxxxxxxxxxxx" className="settings-input" />
+                    <input type="password" value={openaiKey} onChange={(e) => setOpenaiKey(e.target.value)} placeholder="Groq OpenAI API Key" className="settings-input" />
 
                     <button className="settings-save-btn" onClick={handleOpenaiKey} disabled={savingOpenaiKey}>
                         {savingOpenaiKey ? "Saving..." : "Save OpenAI Key"}
