@@ -21,5 +21,13 @@ export const setsystemprompt = (systemPrompt) => {
 }
 
 export const getsystemprompt = () => {
-    return api.get('settings/get-system-prompt')
-}
+    return api.get('/settings/get-system-prompt');
+};
+
+export const getaimode = () => {
+    return api.get('/settings/get-global-ai-mode');
+};
+
+export const setaimode = (value) => {
+    return api.patch('/settings/toggle-global-ai-mode', { value });
+};
