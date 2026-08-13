@@ -82,7 +82,7 @@ function Login() {
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         placeholder="admin@example.com"
-                                        className="w-full bg-transparent outline-none text-[#1F2937] placeholder:text-[#6B7280] p-2"
+                                        className="w-full bg-transparent outline-none text-[#1F2937] placeholder:text-[#abafb7] p-2"
                                     />
                                 </div>
 
@@ -93,7 +93,7 @@ function Login() {
                                         onChange={(e) => setPassword(e.target.value)}
                                         onKeyDown={(e) => e.key === "Enter" && loginbutton()}
                                         placeholder="••••••••"
-                                        className="flex-1 px-4 bg-transparent outline-none text-[#1F2937] placeholder:text-[#6B7280]"
+                                        className="flex-1 px-4 bg-transparent outline-none text-[#1F2937] placeholder:text-[#abafb7]"
                                     />
                                     <button
                                         type="button"
