@@ -31,3 +31,11 @@ export const getaimode = () => {
 export const setaimode = (value) => {
     return api.patch('/settings/toggle-global-ai-mode', { value });
 };
+
+export const setgroqapikey = (value) => {
+    return api.patch('/settings/set-groq-open-ai-key',{value})
+}
+
+export const getgroqapikey = (value) => {
+    return api.get('/settings/get-groq-open-ai-key')
+}

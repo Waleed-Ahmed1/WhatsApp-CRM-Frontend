@@ -22,20 +22,23 @@
   margin: 4px 0 0;
 }
 
+
 .settings-sections {
-  display: grid;
-  grid-template-columns: 480px minmax(0, 1fr);
-  gap: 20px;
-  max-width: 1100px;
-  align-items: start;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    width: 100%;
+    max-width: 1100px;
+    align-items: start;
 }
 
 .settings-card {
-  background: #141824;
-  border: 1px solid #232838;
-  border-radius: 12px;
-  padding: 24px;
-  box-sizing: border-box;
+    background: #141824;
+    border: 1px solid #232838;
+    border-radius: 12px;
+    padding: 24px;
+    box-sizing: border-box;
+    width: 100%;
 }
 
 .settings-card-title {

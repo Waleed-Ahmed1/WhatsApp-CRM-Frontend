@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import "../css/setting.css";
 import { getdelay as getDelayFromServer, setdelay as saveDelayToServer } from "../api/setting";
 import { savetoken as setTokentoServer, gettoken as getTokenfromServer } from "../api/setting";
-import { setsystemprompt, getsystemprompt,getaimode,setaimode } from "../api/setting";
+import { setsystemprompt, getsystemprompt,getaimode,setaimode,setgroqapikey,getgroqapikey } from "../api/setting";
 
 function Settings() {
     const [delay, setDelay] = useState(5);
@@ -15,6 +15,8 @@ function Settings() {
 
     const [systemprompt, setSystemprompt] = useState("");
     const [savingPrompt, setSavingPrompt] = useState(false);
+
+    
 
     useEffect(() => {
         const fetchDelay = async () => {
@@ -63,6 +65,34 @@ function Settings() {
             toast.error(err.response?.data?.message || "Token cannot be Updated!");
         } finally {
             setsavingToken(false);
+        }
+    };
+
+    const [apikey, setApiKey] = useState("");
+    const [savingapiKey, setsavingApiKey] = useState(false);
+
+    useEffect(() => {
+        const fetchApiKey = async () => {
+            try {
+                const res = await getgroqapikey();
+                setApiKey(res.data.groqOpenAiKey);
+            } catch (err) {
+                toast.error(err.response?.data?.message || "Failed to Fetch the API Key");
+            }
+        };
+        fetchApiKey();
+    }, []);
+
+
+    const handleApiKey = async () => {
+        setsavingApiKey(true);
+        try {
+            const res = await setgroqapikey(apikey);
+            toast.success(res.data.message || "API Key Saved Successfully!");
+        } catch (err) {
+            toast.error(err.response?.data?.message || "API Key cannot be Updated!");
+        } finally {
+            setsavingApiKey(false);
         }
     };
 
@@ -167,6 +197,17 @@ function Settings() {
 
                     <button className="settings-save-btn" onClick={handleSaveToken} disabled={savingToken}>
                         {savingToken ? "Saving..." : "Save Token"}
+                    </button>
+                </div>
+
+                <div className="settings-card">
+                    <h3 className="settings-card-title">API Key</h3>
+                    <p className="settings-hint">Your Groq API Key.</p>
+
+                    <input type="password" value={apikey} onChange={(e) => setApiKey(e.target.value)} placeholder="EAAxxxxxxxxxxxxxxxxxxxxxxxx" className="settings-input" />
+
+                    <button className="settings-save-btn" onClick={handleApiKey} disabled={savingapiKey}>
+                        {savingapiKey ? "Saving..." : "Save API Key"}
                     </button>
                 </div>
 
