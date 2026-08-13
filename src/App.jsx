@@ -16,6 +16,7 @@ import ProductView from "./pages/productview.jsx";
 import Contacts from "./pages/contacts.jsx";
 import Groups from "./pages/groups.jsx";
 import ProtectedRoute from "./component/ProtectedRoute.jsx";
+import Broadcast from "./pages/broadcast.jsx";
 
 function App() {
     return (
@@ -33,6 +34,7 @@ function App() {
                         <Route path="chat" element={<LiveChats />} />
                         <Route path="users" element={<SystemUsers />} />
                         <Route path="groups" element={<Groups />} />
+                        <Route path="broadcast" element={<Broadcast />} />
                         <Route path="categories" element={<Categories />} />
                         <Route path="products" element={<Products />} />
                         <Route path="products/:id" element={<ProductView />} />

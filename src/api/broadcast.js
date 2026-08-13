@@ -1,18 +1,38 @@
+// src/api/broadcast.js
 import api from "./api";
 
-export const sendSystemLevelTextBroadcast = (text)=>{
-    return api.post(`broadcasts/send-system-level-text-broadcast`,{text})
-}
+// System Level Broadcasts
+export const sendSystemLevelTextBroadcast = (text) => {
+    return api.post(`broadcasts/send-system-level-text-broadcast`, { text });
+};
 
-export const sendSystemLevelMediaBroadcast = (media) =>{
-    return api.post(`broadcasts/send-system-level-media-broadcast`,{media})
-}
+export const sendSystemLevelMediaBroadcast = (media, caption = "") => {
+    const formData = new FormData();
+    formData.append("media", media);
+    if (caption) {
+        formData.append("caption", caption);
+    }
+    return api.post(`broadcasts/send-system-level-media-broadcast`, formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+    });
+};
 
+// Group Level Broadcasts
+export const sendGroupLevelTextBroadcast = (text, groupIds) => {
+    return api.post(`broadcasts/send-group-level-text-broadcast`, { 
+        text, 
+        groupIds 
+    });
+};
 
-export const sendGroupLevelTextBroadcast = (text)=>{
-    return api.post(`broadcasts/send-group-level-text-broadcast`,{text})
-}
-
-export const sendGroupLevelMediaBroadcast = (media)=>{
-    return api.post(`broadcasts/send-group-level-media-broadcast`,{media})
-}
+export const sendGroupLevelMediaBroadcast = (media, groupIds, caption = "") => {
+    const formData = new FormData();
+    formData.append("media", media);
+    if (caption) {
+        formData.append("caption", caption);
+    }
+    formData.append("groupIds", JSON.stringify(groupIds));
+    return api.post(`broadcasts/send-group-level-media-broadcast`, formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+    });
+};
