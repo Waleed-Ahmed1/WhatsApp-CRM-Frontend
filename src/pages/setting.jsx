@@ -46,7 +46,7 @@ useEffect(() => {
     const fetchToken = async () => {
         try {
             const res = await getTokenfromServer();
-            setToken(res.data.token);
+            setToken(res.data.whatsAppAccessToken);
         } catch (err) {
             toast.error(err.response?.data?.message || "Failed to Fetch the Token");
         }

@@ -9,11 +9,6 @@ export const getcontacts = () =>{
     return api.get('/contacts/get-contacts')
 }
 
-// export const messgaes = () =>{
-//     return api.get('/messages/id')
-// }
-
-
 export const sendmessage = (id, text) => {
     return api.post(`/messages/send-text-message/${id}`, { text });
 };
