@@ -32,10 +32,18 @@ export const setaimode = (value) => {
     return api.patch('/settings/toggle-global-ai-mode', { value });
 };
 
-export const setgroqapikey = (value) => {
-    return api.patch('/settings/set-groq-open-ai-key',{value})
-}
+export const setgroqapikey = (key) => {
+    return api.patch('/settings/set-groq-api-key', { key });
+};
 
-export const getgroqapikey = (value) => {
-    return api.get('/settings/get-groq-open-ai-key')
-}
+export const getgroqapikey = () => {
+    return api.get('/settings/get-groq-api-key');
+};
+
+export const setOpenAiKey = (key) => {
+    return api.patch('/settings/set-groq-open-ai-key', { key });
+};
+
+export const getOpenAiKey = () => {
+    return api.get('/settings/get-groq-open-ai-key');
+};
