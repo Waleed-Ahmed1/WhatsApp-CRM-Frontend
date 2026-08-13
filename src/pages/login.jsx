@@ -36,8 +36,7 @@ function Login() {
 
                 localStorage.setItem("token", res.data.accessToken);
                 localStorage.setItem("user", JSON.stringify(res.data.user));
-
-                toast.success(res.data.message || "Login successful");
+                toast.success(`Welcome ${res.data.user.name}`)
                 navigate("/dashboard/chat", { replace: true });
             }
         } catch (err) {
