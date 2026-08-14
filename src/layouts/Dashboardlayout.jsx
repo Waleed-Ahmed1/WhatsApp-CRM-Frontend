@@ -1,19 +1,17 @@
+import { useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import Sidebar from "../component/Sidebar";
 import { logoutuser } from "../api/auth";
-import { Navigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import '../css/dashboardlayout.css'
 
 export default function DashboardLayout() {
 
     const navigate = useNavigate()
-
+    const [isExpanded, setIsExpanded] = useState(false);
 
     const local_store = JSON.parse(localStorage.getItem("user"))
     const user_name = local_store?.name || "unknown";
     const email_user = local_store?.email || "unknown@gmail.com";
-
 
     const logout = async () => {
         try {
@@ -29,15 +27,22 @@ export default function DashboardLayout() {
     }
 
     return (
+        <div className="h-screen w-full overflow-hidden bg-[#EAF7F4]">
+            <Sidebar
+                isExpanded={isExpanded}
+                setIsExpanded={setIsExpanded}
+                onLogout={logout}
+                username={user_name}
+                email={email_user}
+            />
 
-        <div className="dashboard-layout">
-            <Sidebar onLogout={logout} username={user_name} email={email_user} />
-
-            <div style={{ flex: 1 }}>
+            <main
+                className={`h-screen overflow-hidden transition-all duration-300 ${
+                    isExpanded ? "lg:ml-60" : "lg:ml-[55px]"
+                }`}
+            >
                 <Outlet />
-            </div>
+            </main>
         </div>
-
-
     );
 }
