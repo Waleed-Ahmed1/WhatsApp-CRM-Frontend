@@ -191,7 +191,7 @@ export default function Sidebar({ isExpanded, setIsExpanded, onLogout, email = "
       {/* Mobile drawer */}
 
       <div
-        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-[#111827] transition-transform duration-300 lg:hidden ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-[#0B6F60] transition-transform duration-300 lg:hidden ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -206,10 +206,9 @@ export default function Sidebar({ isExpanded, setIsExpanded, onLogout, email = "
 
           <div>
             <div className="text-sm font-semibold text-white">
-              WhatsApp Panel
+              WhatsApp CRM
             </div>
 
-            <div className="text-xs text-[#4ADE80]">● LIVE</div>
           </div>
         </div>
 
@@ -237,21 +236,10 @@ export default function Sidebar({ isExpanded, setIsExpanded, onLogout, email = "
         </nav>
 
         <div className="border-t border-white/10 px-4 py-4">
-          <div className="mb-3 flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#0EA894] text-sm font-semibold text-white">
-              {username.charAt(0).toUpperCase()}
-            </div>
-
-            <div>
-              <div className="text-sm font-medium text-white">{username}</div>
-
-              <div className="text-xs text-gray-400">{email}</div>
-            </div>
-          </div>
-
+          
           <button
             onClick={onLogout}
-            className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-red-400 transition hover:bg-red-500/10"
+            className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-[#ffffff] transition hover:bg-red-500/10"
           >
             <LogOut size={16} />
 
