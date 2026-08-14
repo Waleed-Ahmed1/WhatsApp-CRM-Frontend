@@ -1,11 +1,17 @@
 import { useState, useEffect } from "react";
-import "../css/groups.css";
-import { getallgroups, getgroupbyid, getgroupmembers, creategroup, deletegroup, addcontacttogroup, removecontactfromgroup, setdescription, deletedescription, setgroupprompt, deletegroupprompt,
+import {
+    getallgroups, getgroupbyid, getgroupmembers, creategroup, deletegroup, addcontacttogroup, removecontactfromgroup, setdescription, deletedescription, setgroupprompt, deletegroupprompt,
     updategroupname, tooglegroupmodebyid
 } from "../api/groups";
 import { getcontacts } from "../api/contacts";
 import toast from "react-hot-toast";
 import ConfirmDialog from "../component/ConfirmDailog";
+import { Users, Plus, X, Search, Pencil, Trash2, Sparkles, ArrowLeft } from "lucide-react";
+
+const AVATAR_COLORS = [
+    "bg-[#0EA894]", "bg-[#0B6F60]", "bg-[#F59E0B]", "bg-[#8B5CF6]",
+    "bg-[#EC4899]", "bg-[#3B82F6]", "bg-[#10B981]", "bg-[#F97316]",
+];
 
 function Groups() {
     // ---- left panel: group list ----
@@ -251,7 +257,6 @@ function Groups() {
         }
     };
 
-
     const [togglingMode, setTogglingMode] = useState(false);
 
     // ---- AI mode toggle ----
@@ -272,230 +277,306 @@ function Groups() {
     const availableContacts = allContacts.filter((c) => !memberIds.has(c.id));
 
     return (
-        <div className="groups-page">
+        <div className="flex h-full w-full overflow-hidden bg-[#EAF7F4]">
 
-            {/* ---------- LEFT: group list ---------- */}
-            <div className="groups-left">
-                <div className="groups-left-header">
-                    <h2>Groups</h2>
-                    <button className="groups-add-btn" onClick={() => setShowAddDialog(true)}>+ Add</button>
+            {/* ---------- LEFT: group grid ---------- */}
+            <div className={`flex w-full flex-col overflow-hidden md:w-[380px] md:flex-none lg:border-r lg:border-[#E5E7EB] ${selectedId ? "hidden md:flex" : "flex"}`}>
+
+                {/* Header */}
+                <div className="flex items-center justify-between bg-[#0B6F60] px-5 py-4">
+                    <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
+                        <Users size={18} /> Groups
+                    </h2>
+                  
                 </div>
 
-                {/* <div className="groups-search-wrap">
-                    <input
-                        type="text"
-                        placeholder="Search groups..."
-                        className="groups-search"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                    <span className="groups-search-icon">🔍</span>
-                </div> */}
+                {/* Search */}
+                <div className="px-4 py-3">
+                    <div className="flex h-11 items-center gap-2 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 transition-all duration-200 focus-within:border-[#0EA894] focus-within:ring-2 focus-within:ring-[#0EA894]/20">
+                        <Search size={14} className="text-[#9CA3AF]" />
+                        <input
+                            type="text"
+                            placeholder="Search groups..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full bg-transparent text-sm text-[#1F2937] outline-none placeholder:text-[#9CA3AF]"
+                        />
+                    </div>
+                </div>
 
-                <div className="groups-list">
+                {/* Grid */}
+                <div className="flex-1 overflow-y-auto px-4 pb-4">
                     {listLoading ? (
-                        <div className="groups-list-empty">Loading...</div>
-                    ) : filteredGroups.length === 0 ? (
-                        <div className="groups-list-empty">
-                            {searchTerm ? "No groups match your search." : "No groups yet. Create one to get started."}
+                        <div className="flex h-40 items-center justify-center">
+                            <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#0EA894]/20 border-t-[#0EA894]" />
                         </div>
                     ) : (
-                        filteredGroups.map((g) => (
-                            <div
-                                key={g.id}
-                                className={`groups-list-item ${selectedId === g.id ? "active" : ""}`}
-                                onClick={() => selectGroup(g.id)}
+                        <div className="grid grid-cols-2 gap-3 mt-2">
+                            {/* Create-group tile, always first */}
+                            <button
+                                onClick={() => setShowAddDialog(true)}
+                                className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[#0EA894]/40 bg-white py-6 text-[#0B6F60] shadow-[0_4px_12px_rgba(0,0,0,0.04)] transition hover:border-[#0EA894] hover:bg-[#0EA894]/5"
                             >
-                                <div className="groups-list-item-info">
-                                    <span className="groups-list-item-name">{g.name}</span>
-                                    <span className="groups-list-item-sub">
-                                        {g.prompt ? "AI prompt set" : "No prompt"}
-                                    </span>
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0EA894]/10">
+                                    <Plus size={18} />
                                 </div>
-                                <button
-                                    className="groups-list-item-delete"
-                                    onClick={(e) => { e.stopPropagation(); setPendingDeleteId(g.id); }}
-                                >
-                                    ✕
-                                </button>
-                            </div>
-                        ))
+                                <span className="text-xs font-medium">Create Group</span>
+                            </button>
+
+                            {filteredGroups.length === 0 ? (
+                                <div className="col-span-2 flex flex-col items-center justify-center gap-2 py-8 text-center">
+                                    <Users size={28} className="text-[#0EA894]/40" />
+                                    <p className="text-xs text-[#6B7280]">
+                                        {searchTerm ? "No groups match your search." : "No groups yet."}
+                                    </p>
+                                </div>
+                            ) : (
+                                filteredGroups.map((g, i) => {
+                                    const isActive = selectedId === g.id;
+                                    return (
+                                        <div
+                                            key={g.id}
+                                            onClick={() => selectGroup(g.id)}
+                                            className={`group relative flex cursor-pointer flex-col gap-2 rounded-2xl border bg-white p-4 shadow-[0_4px_12px_rgba(0,0,0,0.04)] transition hover:shadow-[0_6px_16px_rgba(0,0,0,0.08)] ${
+                                                isActive ? "border-[#0EA894] ring-1 ring-[#0EA894]" : "border-transparent"
+                                            }`}
+                                        >
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); setPendingDeleteId(g.id); }}
+                                                className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full text-[#9CA3AF] opacity-0 transition hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
+                                            >
+                                                <X size={12} />
+                                            </button>
+
+                                            <div className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-white ${AVATAR_COLORS[i % AVATAR_COLORS.length]}`}>
+                                                {g.name?.charAt(0).toUpperCase() || "?"}
+                                            </div>
+
+                                            <div className="min-w-0">
+                                                <p className="truncate text-sm font-semibold text-[#1F2937]">{g.name}</p>
+                                                <p className="mt-0.5 flex items-center gap-1 truncate text-xs text-[#9CA3AF]">
+                                                    {g.prompt && <Sparkles size={10} className="flex-none text-[#0EA894]" />}
+                                                    {g.prompt ? "AI prompt set" : "No prompt"}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            )}
+                        </div>
                     )}
                 </div>
             </div>
 
             {/* ---------- RIGHT: selected group detail ---------- */}
-            <div className="groups-right">
+            <div className={`min-h-0 flex-1 flex-col overflow-y-auto bg-[#EAF7F4] ${selectedId ? "flex" : "hidden md:flex"}`}>
                 {!selectedId ? (
-                    <div className="groups-right-empty">
-                        <div className="groups-right-empty-icon">👥</div>
-                        <h3>Select a group</h3>
-                        <p>Choose a group from the list to view and edit its details.</p>
+                    <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
+                        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
+                            <Users size={36} className="text-[#0EA894]" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-[#1F2937]">Select a group</h3>
+                        <p className="text-sm text-[#6B7280]">Choose a group from the list to view and edit its details.</p>
                     </div>
                 ) : detailLoading || !group ? (
-                    <div className="su-loading"><div className="spinner"></div></div>
+                    <div className="flex h-full items-center justify-center">
+                        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#0EA894]/20 border-t-[#0EA894]" />
+                    </div>
                 ) : (
-                    <>
+                    <div className="mx-auto w-full max-w-5xl space-y-4 px-4 py-6 sm:px-8 lg:px-10">
+
                         {/* header */}
-                        <div className="groups-detail-header">
+                        <div className="rounded-2xl bg-white p-5 shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
                             {editingName ? (
-                                <div className="groups-inline-edit">
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <button
+                                        onClick={() => { setSelectedId(null); setGroup(null); }}
+                                        className="flex h-8 w-8 flex-none items-center justify-center rounded-full text-[#374151] transition hover:bg-[#F3F4F6] md:hidden"
+                                    >
+                                        <ArrowLeft size={16} />
+                                    </button>
                                     <input
                                         type="text"
                                         value={nameDraft}
                                         onChange={(e) => setNameDraft(e.target.value)}
                                         autoFocus
                                         onKeyDown={(e) => e.key === "Enter" && saveName()}
+                                        className="h-9 flex-1 rounded-lg border border-[#E5E7EB] px-3 text-sm outline-none focus:border-[#0EA894]"
                                     />
-                                    <button className="groups-save-btn" onClick={saveName} disabled={savingName}>
+                                    <button onClick={saveName} disabled={savingName} className="rounded-lg bg-[#0B6F60] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#0B8A79] disabled:opacity-60">
                                         {savingName ? "Saving..." : "Save"}
                                     </button>
-                                    <button className="groups-cancel-btn" onClick={() => { setEditingName(false); setNameDraft(group.name); }}>
+                                    <button onClick={() => { setEditingName(false); setNameDraft(group.name); }} className="rounded-lg border border-[#E5E7EB] px-3 py-1.5 text-xs font-medium text-[#374151] hover:bg-[#F3F4F6]">
                                         Cancel
                                     </button>
                                 </div>
                             ) : (
-                                <>
-                                    <h2>{group.name}</h2>
-                                    <div className="groups-detail-header-actions">
+                                <div className="flex flex-wrap items-center justify-between gap-3">
+                                    <div className="flex items-center gap-2">
                                         <button
-                                            className={`groups-ai-toggle-btn ${group.aiEnabled ? "on" : "off"}`}
+                                            onClick={() => { setSelectedId(null); setGroup(null); }}
+                                            className="flex h-8 w-8 flex-none items-center justify-center rounded-full text-[#374151] transition hover:bg-[#F3F4F6] md:hidden"
+                                        >
+                                            <ArrowLeft size={16} />
+                                        </button>
+                                        <h2 className="text-lg font-semibold text-[#1F2937]">{group.name}</h2>
+                                    </div>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <button
                                             onClick={toggleAiMode}
                                             disabled={togglingMode}
+                                            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition disabled:opacity-60 ${
+                                                group.aiEnabled ? "bg-[#0EA894]/10 text-[#0B6F60]" : "bg-gray-100 text-[#6B7280]"
+                                            }`}
                                         >
-                                            <span className="groups-ai-toggle-dot" />
+                                            <span className={`h-2 w-2 rounded-full ${group.aiEnabled ? "bg-[#0EA894]" : "bg-[#9CA3AF]"}`} />
                                             {togglingMode ? "Updating..." : group.aiEnabled ? "AI On" : "AI Off"}
                                         </button>
-                                        <button className="groups-edit-btn" onClick={() => setEditingName(true)}>Rename</button>
-                                        <button className="groups-delete-btn" onClick={() => setPendingDeleteId(group.id)}>Delete Group</button>
+                                        <button onClick={() => setEditingName(true)} className="flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium text-[#374151] transition hover:bg-[#F3F4F6]">
+                                            <Pencil size={12} /> Rename
+                                        </button>
+                                        <button onClick={() => setPendingDeleteId(group.id)} className="flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium text-red-500 transition hover:bg-red-50">
+                                            <Trash2 size={12} /> Delete
+                                        </button>
                                     </div>
-                                </>
+                                </div>
                             )}
                         </div>
 
-                        {/* description */}
-                        <div className="groups-section">
-                            <div className="groups-section-header">
-                                <h3>Description</h3>
-                                <button className="groups-section-btn" onClick={() => setEditingDescription((p) => !p)}>
-                                    {editingDescription ? "Close" : group.description ? "Edit" : "+ Add"}
-                                </button>
+                        {/* description + system prompt side by side on larger screens */}
+                        <div className="grid gap-4 md:grid-cols-2">
+
+                            {/* description */}
+                            <div className="rounded-2xl bg-white p-5 shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
+                                <div className="mb-2 flex items-center justify-between">
+                                    <h3 className="text-sm font-semibold text-[#1F2937]">Description</h3>
+                                    <button onClick={() => setEditingDescription((p) => !p)} className="text-xs font-medium text-[#0B6F60] hover:text-[#0EA894]">
+                                        {editingDescription ? "Close" : group.description ? "Edit" : "+ Add"}
+                                    </button>
+                                </div>
+
+                                {editingDescription ? (
+                                    <div className="space-y-2">
+                                        <textarea
+                                            value={descriptionDraft}
+                                            onChange={(e) => setDescriptionDraft(e.target.value)}
+                                            placeholder="Describe what this group is for..."
+                                            rows={3}
+                                            autoFocus
+                                            className="w-full resize-none rounded-xl border border-[#E5E7EB] p-3 text-sm text-[#1F2937] outline-none focus:border-[#0EA894] focus:ring-2 focus:ring-[#0EA894]/20"
+                                        />
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <button onClick={saveDescription} disabled={savingDescription} className="rounded-lg bg-[#0B6F60] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#0B8A79] disabled:opacity-60">
+                                                {savingDescription ? "Saving..." : "Save"}
+                                            </button>
+                                            <button onClick={() => { setEditingDescription(false); setDescriptionDraft(group.description || ""); }} className="rounded-lg border border-[#E5E7EB] px-3 py-1.5 text-xs font-medium text-[#374151] hover:bg-[#F3F4F6]">
+                                                Cancel
+                                            </button>
+                                            {group.description && (
+                                                <button onClick={removeDescription} className="text-xs font-medium text-red-500 hover:underline">Remove</button>
+                                            )}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <p className={`text-sm ${group.description ? "text-[#374151]" : "text-[#9CA3AF]"}`}>
+                                        {group.description || "No description set."}
+                                    </p>
+                                )}
                             </div>
 
-                            {editingDescription ? (
-                                <div className="groups-section-edit">
-                                    <textarea
-                                        value={descriptionDraft}
-                                        onChange={(e) => setDescriptionDraft(e.target.value)}
-                                        placeholder="Describe what this group is for..."
-                                        rows={3}
-                                        autoFocus
-                                    />
-                                    <div className="groups-section-actions">
-                                        <button className="groups-save-btn" onClick={saveDescription} disabled={savingDescription}>
-                                            {savingDescription ? "Saving..." : "Save"}
-                                        </button>
-                                        <button className="groups-cancel-btn" onClick={() => { setEditingDescription(false); setDescriptionDraft(group.description || ""); }}>
-                                            Cancel
-                                        </button>
-                                        {group.description && (
-                                            <button className="groups-remove-link" onClick={removeDescription}>Remove</button>
-                                        )}
-                                    </div>
+                            {/* system prompt */}
+                            <div className="rounded-2xl bg-white p-5 shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
+                                <div className="mb-2 flex items-center justify-between">
+                                    <h3 className="text-sm font-semibold text-[#1F2937]">System Prompt</h3>
+                                    <button onClick={() => setEditingPrompt((p) => !p)} className="text-xs font-medium text-[#0B6F60] hover:text-[#0EA894]">
+                                        {editingPrompt ? "Close" : group.prompt ? "Edit" : "+ Add"}
+                                    </button>
                                 </div>
-                            ) : (
-                                <p className={group.description ? "groups-text" : "groups-text-empty"}>
-                                    {group.description || "No description set."}
-                                </p>
-                            )}
-                        </div>
 
-                        {/* system prompt */}
-                        <div className="groups-section">
-                            <div className="groups-section-header">
-                                <h3>System Prompt</h3>
-                                <button className="groups-section-btn" onClick={() => setEditingPrompt((p) => !p)}>
-                                    {editingPrompt ? "Close" : group.prompt ? "Edit" : "+ Add"}
-                                </button>
+                                {editingPrompt ? (
+                                    <div className="space-y-2">
+                                        <textarea
+                                            value={promptDraft}
+                                            onChange={(e) => setPromptDraft(e.target.value)}
+                                            placeholder="How should the AI respond to contacts in this group?"
+                                            rows={6}
+                                            autoFocus
+                                            className="w-full resize-none rounded-xl border border-[#E5E7EB] p-3 text-sm text-[#1F2937] outline-none focus:border-[#0EA894] focus:ring-2 focus:ring-[#0EA894]/20"
+                                        />
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <button onClick={savePrompt} disabled={savingPrompt} className="rounded-lg bg-[#0B6F60] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#0B8A79] disabled:opacity-60">
+                                                {savingPrompt ? "Saving..." : "Save"}
+                                            </button>
+                                            <button onClick={() => { setEditingPrompt(false); setPromptDraft(group.prompt || ""); }} className="rounded-lg border border-[#E5E7EB] px-3 py-1.5 text-xs font-medium text-[#374151] hover:bg-[#F3F4F6]">
+                                                Cancel
+                                            </button>
+                                            {group.prompt && (
+                                                <button onClick={removePrompt} className="text-xs font-medium text-red-500 hover:underline">Remove</button>
+                                            )}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <p className={`whitespace-pre-wrap text-sm ${group.prompt ? "text-[#374151]" : "text-[#9CA3AF]"}`}>
+                                        {group.prompt || "No system prompt set. This group has no custom AI behavior."}
+                                    </p>
+                                )}
                             </div>
-
-                            {editingPrompt ? (
-                                <div className="groups-section-edit">
-                                    <textarea
-                                        value={promptDraft}
-                                        onChange={(e) => setPromptDraft(e.target.value)}
-                                        placeholder="How should the AI respond to contacts in this group?"
-                                        rows={6}
-                                        autoFocus
-                                    />
-                                    <div className="groups-section-actions">
-                                        <button className="groups-save-btn" onClick={savePrompt} disabled={savingPrompt}>
-                                            {savingPrompt ? "Saving..." : "Save"}
-                                        </button>
-                                        <button className="groups-cancel-btn" onClick={() => { setEditingPrompt(false); setPromptDraft(group.prompt || ""); }}>
-                                            Cancel
-                                        </button>
-                                        {group.prompt && (
-                                            <button className="groups-remove-link" onClick={removePrompt}>Remove</button>
-                                        )}
-                                    </div>
-                                </div>
-                            ) : (
-                                <p className={group.prompt ? "groups-text groups-prompt-text" : "groups-text-empty"}>
-                                    {group.prompt || "No system prompt set — this group has no custom AI behavior."}
-                                </p>
-                            )}
                         </div>
 
                         {/* members */}
-                        <div className="groups-section">
-                            <div className="groups-section-header">
-                                <h3>Members ({members.length})</h3>
-                                <button className="groups-section-btn" onClick={toggleAddMember}>
+                        <div className="rounded-2xl bg-white p-5 shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
+                            <div className="mb-2 flex items-center justify-between">
+                                <h3 className="text-sm font-semibold text-[#1F2937]">Members ({members.length})</h3>
+                                <button onClick={toggleAddMember} className="text-xs font-medium text-[#0B6F60] hover:text-[#0EA894]">
                                     {showAddMember ? "Close" : "+ Add Member"}
                                 </button>
                             </div>
 
                             {showAddMember && (
-                                <div className="groups-section-edit groups-add-member-row">
+                                <div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-3">
                                     <select
                                         value={selectedContactId}
                                         onChange={(e) => setSelectedContactId(e.target.value)}
+                                        className="h-9 flex-1 rounded-lg border border-[#E5E7EB] bg-white px-3 text-sm text-[#1F2937] outline-none focus:border-[#0EA894]"
                                     >
                                         <option value="">Select a contact</option>
                                         {availableContacts.map((c) => (
                                             <option key={c.id} value={c.id}>{c.name || c.waId}</option>
                                         ))}
                                     </select>
-                                    <button className="groups-save-btn" onClick={addMember} disabled={addingMember}>
+                                    <button onClick={addMember} disabled={addingMember} className="rounded-lg bg-[#0B6F60] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#0B8A79] disabled:opacity-60">
                                         {addingMember ? "Adding..." : "Add"}
                                     </button>
-                                    <button className="groups-cancel-btn" onClick={toggleAddMember}>Cancel</button>
+                                    <button onClick={toggleAddMember} className="rounded-lg border border-[#E5E7EB] bg-white px-3 py-1.5 text-xs font-medium text-[#374151] hover:bg-[#F3F4F6]">
+                                        Cancel
+                                    </button>
                                 </div>
                             )}
 
-                            <div className="groups-members-row">
+                            <div className="flex flex-wrap gap-2">
                                 {members.length === 0 ? (
-                                    <p className="groups-text-empty">No members in this group yet.</p>
+                                    <p className="text-sm text-[#9CA3AF]">No members in this group yet.</p>
                                 ) : (
                                     members.map((m) => (
-                                        <span className="groups-member-pill" key={m.id}>
+                                        <span key={m.id} className="flex items-center gap-1.5 rounded-full bg-[#0EA894]/10 py-1.5 pl-3 pr-2 text-xs font-medium text-[#0B6F60]">
                                             {m.name || m.waId}
-                                            <button onClick={() => removeMember(m.id)}>✕</button>
+                                            <button onClick={() => removeMember(m.id)} className="flex h-4 w-4 items-center justify-center rounded-full transition hover:bg-[#0EA894]/20">
+                                                <X size={10} />
+                                            </button>
                                         </span>
                                     ))
                                 )}
                             </div>
                         </div>
-                    </>
+                    </div>
                 )}
             </div>
 
             {/* create-group dialog */}
             {showAddDialog && (
-                <div className="overlay" onClick={() => setShowAddDialog(false)}>
-                    <div className="groups-add-dialog" onClick={(e) => e.stopPropagation()}>
-                        <h3>Add Group</h3>
+                <div onClick={() => setShowAddDialog(false)} className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 px-4">
+                    <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-[0_20px_50px_rgba(0,0,0,0.15)]">
+                        <h3 className="mb-3 text-base font-semibold text-[#1F2937]">Add Group</h3>
                         <input
                             type="text"
                             placeholder="Group Name"
@@ -503,10 +584,13 @@ function Groups() {
                             onChange={(e) => setNewGroupName(e.target.value)}
                             onKeyDown={(e) => e.key === "Enter" && addGroup()}
                             autoFocus
+                            className="h-11 w-full rounded-xl border border-[#E5E7EB] px-4 text-sm text-[#1F2937] outline-none focus:border-[#0EA894] focus:ring-2 focus:ring-[#0EA894]/20"
                         />
-                        <div className="groups-section-actions">
-                            <button className="groups-cancel-btn" onClick={() => setShowAddDialog(false)}>Cancel</button>
-                            <button className="groups-save-btn" onClick={addGroup} disabled={creating}>
+                        <div className="mt-4 flex justify-end gap-2">
+                            <button onClick={() => setShowAddDialog(false)} className="rounded-xl border border-[#E5E7EB] px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#F3F4F6]">
+                                Cancel
+                            </button>
+                            <button onClick={addGroup} disabled={creating} className="rounded-xl bg-[#0B6F60] px-4 py-2 text-sm font-medium text-white hover:bg-[#0B8A79] disabled:opacity-60">
                                 {creating ? "Saving..." : "Save Group"}
                             </button>
                         </div>
