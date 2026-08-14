@@ -16,10 +16,12 @@ import {
   getcontactwithlastmessage,
   sendmessage,
   sendattachments,
+  getcontactchathistory,
 } from "../api/livechats";
 import toast from "react-hot-toast";
 
 function LiveChats() {
+  const [loadingMessages, setLoadingMessages] = useState(false);
   const [contacts, setcontacts] = useState([]);
   const [selectedContactId, setSelectedContactId] = useState(null);
 
@@ -160,6 +162,29 @@ function LiveChats() {
     }
     return <FaCheck size={11} className="text-gray-400" />;
   };
+  useEffect(() => {
+    if (!selectedContactId) {
+      setChatMessages([]);
+      return;
+    }
+
+    const fetchChatHistory = async () => {
+      setLoadingMessages(true);
+      try {
+        const res = await getcontactchathistory(selectedContactId);
+
+        setChatMessages(res.data.chatHistory);
+      } catch (err) {
+        console.error("Chat history error:", err);
+        toast.error("Failed to load chat history");
+        setChatMessages([]);
+      } finally {
+        setLoadingMessages(false);
+      }
+    };
+
+    fetchChatHistory();
+  }, [selectedContactId]);
 
   return (
     <div className="flex h-full w-full overflow-hidden bg-[#EAF7F4]">
@@ -213,7 +238,8 @@ function LiveChats() {
                   onClick={() => {
                     setSelectedContactId(con.id);
                     setSelectedContact(con);
-                    setChatMessages(con.message || []);
+                    setSelectedContactId(con.id);
+                    setSelectedContact(con);
                   }}
                   className={`flex cursor-pointer items-center gap-3 rounded-xl px-3 py-3 transition mb-2 shadow-md ${
                     isActive ? "bg-gray-200" : "bg-gray-50"
@@ -308,93 +334,105 @@ function LiveChats() {
             </div>
 
             {/* Messages */}
-            {/* Messages */}
-            <div className="relative min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-8 pb-24">
-              {/* Background image */}
+            <div className="relative min-h-0 flex-1 overflow-hidden">
+              {/* Background image — fixed in place, shown once, never scrolls */}
+              {/* Mobile and tablet image */}
               <div
-                className="absolute inset-0 bg-contain bg-center"
+                className="absolute inset-0 bg-cover bg-no-repeat lg:hidden"
                 style={{ backgroundImage: "url('/chat-bg-image.jpg')" }}
               />
 
-              {/* Content sits above the background */}
-              <div className="relative space-y-2">
-                <div className="flex justify-center">
-                  <span className="rounded-full bg-white px-3 py-1 text-xs text-[#6B7280] shadow-sm">
-                    Today
-                  </span>
-                </div>
+              {/* Desktop image */}
+              <div
+                className="absolute inset-0 hidden bg-cover bg-no-repeat lg:block"
+                style={{ backgroundImage: "url('/wa-bg-image-lg.png')" }}
+              />
 
-                {chatMessages.length === 0 ? (
-                  <p className="pt-10 text-center text-sm text-[#9CA3AF]">
-                    No messages yet.
-                  </p>
-                ) : (
-                  chatMessages.map((msg) => {
-                    const isSent = msg.direction === "OUTGOING";
+              {/* Scrollable messages layer sits on top; only this scrolls */}
+              <div className="relative h-full overflow-y-auto px-4 py-4 sm:px-8 pb-24">
+                <div className="space-y-2">
+                  <div className="flex justify-center">
+                    <span className="rounded-full bg-white px-3 py-1 text-xs text-[#6B7280] shadow-sm">
+                      Today
+                    </span>
+                  </div>
 
-                    return (
-                      <div
-                        key={msg.id}
-                        className={`flex ${isSent ? "justify-end" : "justify-start"}`}
-                      >
+                  {loadingMessages ? (
+                    <p className="pt-10 text-center text-sm text-[#9CA3AF]">
+                      Loading messages...
+                    </p>
+                  ) : chatMessages.length === 0 ? (
+                    <p className="pt-10 text-center text-sm text-[#9CA3AF]">
+                      No messages yet.
+                    </p>
+                  ) : (
+                    chatMessages.map((msg) => {
+                      const isSent = msg.direction === "OUTGOING";
+
+                      return (
                         <div
-                          className={`max-w-[75%] rounded-2xl px-3.5 py-2.5 shadow-sm sm:max-w-[60%] ${
-                            isSent
-                              ? "rounded-tr-sm bg-[#0EA894] text-white"
-                              : "rounded-tl-sm bg-white text-[#1F2937]"
-                          }`}
+                          key={msg.id}
+                          className={`flex ${isSent ? "justify-end" : "justify-start"}`}
                         >
-                          {msg.type === "image" && msg.mediaUrl && (
-                            <img
-                              src={msg.mediaUrl}
-                              alt="attachment"
-                              className="mb-1.5 max-h-64 w-full rounded-xl object-cover"
-                            />
-                          )}
-                          {msg.type === "video" && msg.mediaUrl && (
-                            <video
-                              src={msg.mediaUrl}
-                              controls
-                              className="mb-1.5 max-h-64 w-full rounded-xl"
-                            />
-                          )}
-                          {msg.type === "audio" && msg.mediaUrl && (
-                            <audio
-                              src={msg.mediaUrl}
-                              controls
-                              className="mb-1.5 w-full"
-                            />
-                          )}
-                          {msg.type === "document" && msg.mediaUrl && (
-                            <a
-                              href={msg.mediaUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              className={`mb-1.5 flex items-center gap-2 rounded-xl px-3 py-2 text-sm underline ${
-                                isSent ? "bg-white/15" : "bg-[#F3F4F6]"
-                              }`}
-                            >
-                              📄 {msg.fileName || "Document"}
-                            </a>
-                          )}
-
-                          {msg.body && (
-                            <p className="text-sm leading-relaxed">
-                              {msg.body}
-                            </p>
-                          )}
-
                           <div
-                            className={`mt-1 flex items-center justify-end gap-1 text-[10px] ${isSent ? "text-white/70" : "text-[#9CA3AF]"}`}
+                            className={`max-w-[75%] rounded-2xl px-3.5 py-2.5 shadow-sm sm:max-w-[60%] ${
+                              isSent
+                                ? "rounded-tr-sm bg-[#0EA894] text-white"
+                                : "rounded-tl-sm bg-white text-[#1F2937]"
+                            }`}
                           >
-                            {formatTime(msg.createdAt)}
-                            {isSent && renderTicks(msg.status)}
+                            {msg.type === "image" && msg.mediaUrl && (
+                              <img
+                                src={msg.mediaUrl}
+                                alt="attachment"
+                                className="mb-1.5 max-h-64 w-full rounded-xl object-cover"
+                              />
+                            )}
+                            {msg.type === "video" && msg.mediaUrl && (
+                              <video
+                                src={msg.mediaUrl}
+                                controls
+                                className="mb-1.5 max-h-64 w-full rounded-xl"
+                              />
+                            )}
+                            {msg.type === "audio" && msg.mediaUrl && (
+                              <audio
+                                src={msg.mediaUrl}
+                                controls
+                                className="mb-1.5 w-full"
+                              />
+                            )}
+                            {msg.type === "document" && msg.mediaUrl && (
+                              <a
+                                href={msg.mediaUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className={`mb-1.5 flex items-center gap-2 rounded-xl px-3 py-2 text-sm underline ${
+                                  isSent ? "bg-white/15" : "bg-[#F3F4F6]"
+                                }`}
+                              >
+                                📄 {msg.fileName || "Document"}
+                              </a>
+                            )}
+
+                            {msg.body && (
+                              <p className="text-sm leading-relaxed">
+                                {msg.body}
+                              </p>
+                            )}
+
+                            <div
+                              className={`mt-1 flex items-center justify-end gap-1 text-[10px] ${isSent ? "text-white/70" : "text-[#9CA3AF]"}`}
+                            >
+                              {formatTime(msg.createdAt)}
+                              {isSent && renderTicks(msg.status)}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })
-                )}
+                      );
+                    })
+                  )}
+                </div>
               </div>
             </div>
 

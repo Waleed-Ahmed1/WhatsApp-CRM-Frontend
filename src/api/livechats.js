@@ -4,6 +4,10 @@ export const getcontactwithlastmessage = () =>{
     return api.get('/contacts/get-all-contacts-with-last-message')
 }
 
+export const getcontactchathistory = (contactId) =>{
+    return  api.get(`contacts/get-contact-chat-history/${contactId}`);
+}
+ 
 // later this will moved to the contacts endpoints
 export const getcontacts = () =>{
     return api.get('/contacts/get-contacts')
