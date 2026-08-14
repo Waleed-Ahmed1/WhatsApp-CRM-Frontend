@@ -165,7 +165,7 @@ function LiveChats() {
     <div className="flex h-full w-full overflow-hidden bg-[#EAF7F4]">
       {/* CHAT LIST */}
       <div
-        className={`flex w-full flex-col border-r border-[#E5E7EB] bg-white md:w-[360px] md:flex-none ${selectedContact ? "hidden md:flex" : "flex"}`}
+        className={`flex w-full flex-col lg:border-r lg:border-[#E5E7EB] bg-white md:w-[360px] md:flex-none ${selectedContact ? "hidden md:flex" : "flex"}`}
       >
         {/* Header */}
         <div className="flex items-center justify-between bg-[#0B6F60] px-5 py-4">
@@ -181,7 +181,7 @@ function LiveChats() {
         </div>
 
         {/* Search */}
-        <div className="px-4 py-3 border-r border-gray-300">
+        <div className="px-4 py-3 lg:border-r lg:border-gray-300">
           <div className="flex h-11 items-center gap-2 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 transition-all duration-200 focus-within:border-[#0EA894] focus-within:ring-2 focus-within:ring-[#0EA894]/20">
             <FaSearch size={13} className="text-[#9CA3AF]" />
             <input
@@ -196,7 +196,7 @@ function LiveChats() {
         </div>
 
         {/* Chat items */}
-        <div className="flex-1 overflow-y-auto px-2 pb-3 border-r border-gray-300">
+        <div className="flex-1 overflow-y-auto px-2 pb-3 lg:border-r lg:border-gray-300">
           {filteredContacts.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
               <FaWhatsapp size={36} className="text-[#0EA894]/40" />
@@ -265,7 +265,7 @@ function LiveChats() {
               <FaWhatsapp size={40} className="text-[#25D366]" />
             </div>
             <h2 className="text-lg font-semibold text-[#1F2937]">
-              WhatsApp Chatbot Panel
+              WhatsApp Chatbot CRM
             </h2>
             <p className="text-sm text-[#6B7280]">
               Select a chat from the left to start viewing messages.
