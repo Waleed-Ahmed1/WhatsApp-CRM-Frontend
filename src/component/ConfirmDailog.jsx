@@ -1,13 +1,49 @@
+import { AlertTriangle, X } from "lucide-react";
+
 export default function ConfirmDialog({ open, message, onConfirm, onCancel }) {
   if (!open) return null;
 
   return (
-    <div onClick={onCancel} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ background: "#141824", border: "1px solid #232838", borderRadius: 10, padding: 20, width: 300 }}>
-        <p style={{ color: "#fff", fontSize: 14, marginBottom: 16 }}>{message}</p>
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-          <button onClick={onCancel} style={{ background: "transparent", border: "1px solid #232838", color: "#9aa0ac", borderRadius: 6, padding: "6px 14px", cursor: "pointer" }}>Cancel</button>
-          <button onClick={onConfirm} style={{ background: "rgba(248,113,113,0.15)", border: "none", color: "#f87171", borderRadius: 6, padding: "6px 14px", cursor: "pointer" }}>Delete</button>
+    <div
+      onClick={onCancel}
+      className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 px-4"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-[320px] overflow-hidden rounded-3xl bg-white shadow-[0_20px_50px_rgba(0,0,0,0.15)]"
+      >
+        {/* Top banner */}
+        <div className="relative flex h-32 items-center justify-center bg-[#0EA894]">
+          <button
+            onClick={onCancel}
+            className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-[#0B6F60] transition hover:bg-white"
+          >
+            <X size={14} />
+          </button>
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/15">
+            <AlertTriangle size={30} className="text-white" />
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="px-6 pb-6 pt-5 text-center">
+          <h3 className="text-lg font-semibold text-[#1F2937]">Hang On a Sec!</h3>
+          <p className="mt-1.5 text-sm text-[#6B7280]">{message}</p>
+
+          <div className="mt-5 flex gap-3">
+            <button
+              onClick={onCancel}
+              className="flex-1 rounded-xl border border-[#E5E7EB] py-2.5 text-sm font-medium text-[#374151] transition hover:bg-[#F3F4F6]"
+            >
+              Let Me Rethink
+            </button>
+            <button
+              onClick={onConfirm}
+              className="flex-1 rounded-xl bg-[#0B6F60] py-2.5 text-sm font-medium text-white transition hover:bg-[#0B8A79]"
+            >
+              Yes, Delete
+            </button>
+          </div>
         </div>
       </div>
     </div>
