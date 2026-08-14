@@ -26,7 +26,7 @@ export const getkeyword = (id) =>{
 
 export const uploadmedia = (id, file, category) => {
     const formData = new FormData();
-    formData.append("category", category || "general");   // fields before file
+    formData.append("category", category);  
     formData.append("media", file);
     return api.post(`/products/${id}/media`, formData);
 };
