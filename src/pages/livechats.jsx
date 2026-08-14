@@ -367,7 +367,7 @@ function LiveChats() {
                                     onChange={handleFileSelect}
                                 />
 
-                                <div className=" bg-gray-100 flex h-11 flex-1 items-center rounded-xl border border-[#E5E7EB] px-4 transition-all duration-200 focus-within:border-[#0EA894] focus-within:ring-2 focus-within:ring-[#0EA894]/20">
+                                <div className=" bg-gray-200 flex h-11 flex-1 items-center rounded-xl border border-[#E5E7EB] px-4 transition-all duration-200 focus-within:border-[#0EA894] focus-within:ring-2 focus-within:ring-[#0EA894]/20">
                                     <input
                                         type="text"
                                         placeholder="Type a message"
