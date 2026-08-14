@@ -1,6 +1,16 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import "../css/productview.css";
+import {
+    ArrowLeft,
+    Trash2,
+    Tag,
+    Image as ImageIcon,
+    Plus,
+    X,
+    Upload,
+    FileText,
+    ExternalLink,
+} from "lucide-react";
 import { getproduct, addkeyword, uploadmedia, getmedia, getkeyword, deleteproduct } from "../api/products";
 import toast from "react-hot-toast";
 import ConfirmDialog from "../component/ConfirmDailog";
@@ -77,18 +87,17 @@ function ProductView() {
     const getMedia = async (id) => {
         try {
             const res = await getmedia(id);
-            setMedia(res.data.productMedia|| []);
+            setMedia(res.data.productMedia || []);
         } catch (err) {
             toast.error(err.response?.data?.message || "Failed to load media");
         }
     };
 
-   const uploadMedia = async (productId) => {
-        if (!selectedFile) {  
+    const uploadMedia = async (productId) => {
+        if (!selectedFile) {
             toast.error("Please select a file!");
             return;
         }
-        console.log("product.category is:", product.category);
         setUploading(true);
         try {
             const res = await uploadmedia(productId, selectedFile, product.category?.name);
@@ -131,107 +140,227 @@ function ProductView() {
         setPendingDeleteId(null);
     };
 
-
     const getMediaUrl = (m) => {
         const path = m.filePath || m.url || m.file_url || m.media_url || m.path || "";
         if (!path) return "";
-        
+
         const backendOrigin = import.meta.env.VITE_API_URL.replace(/\/api\/v1\/?$/, "");
         return path.startsWith("http") ? path : `${backendOrigin}/${path.replace(/^\/+/, "")}`;
     };
     const getMediaType = (m) => (m.type || m.mime_type || m.content_type || "").toLowerCase();
 
-    if (loading) return <div className="su-loading"><div className="spinner"></div></div>;
+    if (loading) {
+        return (
+            <div className="flex h-full w-full items-center justify-center bg-[#EAF7F4]">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#0EA894]/20 border-t-[#0EA894]" />
+            </div>
+        );
+    }
 
-    if (!product) return <div className="pv-page"><p style={{ color: "#9aa0ac" }}>Product not found.</p></div>;
+    if (!product) {
+        return (
+            <div className="flex h-full w-full items-center justify-center bg-[#EAF7F4]">
+                <p className="text-sm text-[#9CA3AF]">Product not found.</p>
+            </div>
+        );
+    }
 
     return (
-        <div className="pv-page">
+        <div className="h-full w-full overflow-y-auto bg-[#EAF7F4] px-4 py-6 sm:px-8">
+            <div className="mx-auto w-full max-w-4xl space-y-4">
 
-            <div className="pv-header">
-                <button className="pv-back-btn" onClick={() => navigate("/dashboard/products")}>← Back</button>
-                <div className="pv-header-actions"><button className="pv-edit-btn" onClick={() => handleDelete(product.id)}>Delete Product</button></div>
-            </div>
-
-            <div className="pv-card pv-info-row">
-
-                <div className="pv-info-list">
-                    <h3 className="pv-section-title">Product Information</h3>
-                    <div className="pv-info-item"><span className="pv-info-label">Name</span><span className="pv-info-value">{product.name}</span></div>
-                    <div className="pv-info-item"><span className="pv-info-label">Price</span><span className="pv-info-value">{product.price}</span></div>
-                    <div className="pv-info-item"><span className="pv-info-label">Description</span><span className="pv-info-value">{product.description}</span></div>
-                    <div className="pv-info-item"><span className="pv-info-label">Category</span><span className="pv-info-value">{product.category?.name}</span></div>
-                </div>
-            </div>
-
-            <div className="pv-card">
-                <div className="pv-card-header">
-                    <h3 className="pv-section-title">Keywords</h3>
-                    <button className="pv-add-btn" onClick={toggleKeywordInput}>
-                        {showKeywordInput ? "Close" : "+ Add"}
+                {/* Header */}
+                <div className="flex items-center justify-between">
+                    <button
+                        onClick={() => navigate("/dashboard/products")}
+                        className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-2 text-sm font-medium text-[#374151] shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition hover:bg-[#F3F4F6]"
+                    >
+                        <ArrowLeft size={14} />
+                        Back
+                    </button>
+                    <button
+                        onClick={() => handleDelete(product.id)}
+                        className="flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-medium text-red-500 transition hover:bg-red-50"
+                    >
+                        <Trash2 size={14} />
+                        Delete Product
                     </button>
                 </div>
 
-                {showKeywordInput && (
-                    <div className="keyword-input-area">
-                        <input
-                            type="text"
-                            value={newKeyword}
-                            onChange={(e) => setNewKeyword(e.target.value)}
-                            placeholder="Enter keyword"
-                            autoFocus
-                            onKeyDown={(e) => e.key === "Enter" && addKeyword(product.id)}
-                        />
-                        <button className="pv-add-btn" onClick={() => addKeyword(product.id)}>Add</button>
-                        <button className="pv-cancel-btn" onClick={toggleKeywordInput}>Cancel</button>
-                    </div>
-                )}
-
-                <div className="pv-keywords-row">
-                    {keywords.map((kw, index) => <span className="pv-keyword-pill" key={index}>{typeof kw === "string" ? kw : kw.keyword}</span>)}
-                </div>
-            </div>
-
-            <div className="pv-card">
-                <div className="pv-card-header">
-                    <h3 className="pv-section-title">Media</h3>
-                    <button className="pv-add-btn" onClick={toggleMediaUpload}>
-                        {showMediaUpload ? "Close" : "+ Add Media"}
-                    </button>
-                </div>
-
-                {showMediaUpload &&
-                    <div className="media-upload-area">
-                        <div className="media-upload-icon">＋</div>
-                        <h4>Add Product Media</h4>
-                        <p>Upload an image, video or voice note</p>
-
-                        <label className="media-select-btn">
-                            Choose File
-                            <input type="file" accept="image/*,video/*,audio/*" onChange={(e) => setSelectedFile(e.target.files[0])} />
-                        </label>
-
-                        {selectedFile &&
-                            <div className="selected-file">
-                                <span>{selectedFile.name}</span>
-                                <button onClick={() => setSelectedFile(null)}>✕</button>
-                            </div>}
-
-                        <div className="media-upload-actions">
-                            <button className="pv-cancel-btn" onClick={toggleMediaUpload}>Cancel</button>
-                            <button className="pv-add-btn" onClick={() => uploadMedia(product.id)} disabled={!selectedFile || uploading}>{uploading ? "Uploading..." : "Upload Media"}</button>
+                {/* Product info */}
+                <div className="rounded-2xl bg-white p-5 shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
+                    <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                            <h2 className="text-lg font-semibold text-[#1F2937]">{product.name}</h2>
+                            {product.category?.name && (
+                                <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-[#0EA894]/10 px-2.5 py-1 text-[11px] font-medium text-[#0B6F60]">
+                                    <Tag size={10} />
+                                    {product.category.name}
+                                </span>
+                            )}
                         </div>
-                    </div>}
+                        <span className="text-xl font-semibold text-[#0B6F60]">{product.price} PKR</span>
+                    </div>
 
-                <div className="pv-media-row">
-                    {media.length === 0 ? <div className="no-media">No media uploaded yet.</div> :
-                        media.map((m, index) => {
-                            const url = getMediaUrl(m);
-                            const type = getMediaType(m);
-                            return <div className="pv-media-box" key={m.id || index}>
-                                {type.startsWith("image") ? <img src={url} alt="Product media" /> : type.startsWith("video") ? <video src={url} controls /> : type.startsWith("audio") ? <audio src={url} controls /> : <a href={url} target="_blank" rel="noreferrer">Open Media</a>}
+                    <div className="border-t border-[#F3F4F6] pt-4">
+                        <p className="mb-1 text-xs font-medium uppercase tracking-wide text-[#9CA3AF]">Description</p>
+                        <p className="text-sm leading-relaxed text-[#374151]">{product.description}</p>
+                    </div>
+                </div>
+
+                {/* Keywords */}
+                <div className="rounded-2xl bg-white p-5 shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
+                    <div className="mb-3 flex items-center justify-between">
+                        <h3 className="text-sm font-semibold text-[#1F2937]">Keywords</h3>
+                        <button
+                            onClick={toggleKeywordInput}
+                            className="text-xs font-medium text-[#0B6F60] hover:text-[#0EA894]"
+                        >
+                            {showKeywordInput ? "Close" : "+ Add"}
+                        </button>
+                    </div>
+
+                    {showKeywordInput && (
+                        <div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-3">
+                            <input
+                                type="text"
+                                value={newKeyword}
+                                onChange={(e) => setNewKeyword(e.target.value)}
+                                placeholder="Enter keyword"
+                                autoFocus
+                                onKeyDown={(e) => e.key === "Enter" && addKeyword(product.id)}
+                                className="h-9 flex-1 rounded-lg border border-[#E5E7EB] bg-white px-3 text-sm text-[#1F2937] outline-none focus:border-[#0EA894]"
+                            />
+                            <button
+                                onClick={() => addKeyword(product.id)}
+                                className="rounded-lg bg-[#0B6F60] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#0B8A79]"
+                            >
+                                Add
+                            </button>
+                            <button
+                                onClick={toggleKeywordInput}
+                                className="rounded-lg border border-[#E5E7EB] bg-white px-3 py-1.5 text-xs font-medium text-[#374151] hover:bg-[#F3F4F6]"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    )}
+
+                    <div className="flex flex-wrap gap-2">
+                        {keywords.length === 0 ? (
+                            <p className="text-sm text-[#9CA3AF]">No keywords added yet.</p>
+                        ) : (
+                            keywords.map((kw, index) => (
+                                <span
+                                    key={index}
+                                    className="rounded-full bg-[#0EA894]/10 px-3 py-1.5 text-xs font-medium text-[#0B6F60]"
+                                >
+                                    {typeof kw === "string" ? kw : kw.keyword}
+                                </span>
+                            ))
+                        )}
+                    </div>
+                </div>
+
+                {/* Media */}
+                <div className="rounded-2xl bg-white p-5 shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
+                    <div className="mb-3 flex items-center justify-between">
+                        <h3 className="text-sm font-semibold text-[#1F2937]">Media</h3>
+                        <button
+                            onClick={toggleMediaUpload}
+                            className="text-xs font-medium text-[#0B6F60] hover:text-[#0EA894]"
+                        >
+                            {showMediaUpload ? "Close" : "+ Add Media"}
+                        </button>
+                    </div>
+
+                    {showMediaUpload && (
+                        <div className="mb-4 rounded-xl border-2 border-dashed border-[#E5E7EB] bg-[#F9FAFB] p-5">
+                            {!selectedFile ? (
+                                <label className="flex cursor-pointer flex-col items-center justify-center gap-2 py-6 text-center">
+                                    <Upload size={24} className="text-[#0EA894]" />
+                                    <h4 className="text-sm font-semibold text-[#1F2937]">Add Product Media</h4>
+                                    <p className="text-xs text-[#9CA3AF]">Upload an image, video or voice note</p>
+                                    <span className="mt-1 rounded-full bg-[#0B6F60] px-4 py-1.5 text-xs font-medium text-white">
+                                        Choose File
+                                    </span>
+                                    <input
+                                        type="file"
+                                        accept="image/*,video/*,audio/*"
+                                        onChange={(e) => setSelectedFile(e.target.files[0])}
+                                        className="hidden"
+                                    />
+                                </label>
+                            ) : (
+                                <div className="flex items-center justify-between rounded-xl border border-[#E5E7EB] bg-white p-3">
+                                    <div className="flex min-w-0 items-center gap-2">
+                                        <FileText size={16} className="flex-none text-[#0B6F60]" />
+                                        <span className="truncate text-sm text-[#374151]">{selectedFile.name}</span>
+                                    </div>
+                                    <button
+                                        onClick={() => setSelectedFile(null)}
+                                        className="flex h-6 w-6 flex-none items-center justify-center rounded-full text-[#9CA3AF] transition hover:bg-red-50 hover:text-red-500"
+                                    >
+                                        <X size={12} />
+                                    </button>
+                                </div>
+                            )}
+
+                            <div className="mt-4 flex justify-end gap-2">
+                                <button
+                                    onClick={toggleMediaUpload}
+                                    className="rounded-lg border border-[#E5E7EB] bg-white px-3 py-1.5 text-xs font-medium text-[#374151] hover:bg-[#F3F4F6]"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={() => uploadMedia(product.id)}
+                                    disabled={!selectedFile || uploading}
+                                    className="rounded-lg bg-[#0B6F60] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#0B8A79] disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    {uploading ? "Uploading..." : "Upload Media"}
+                                </button>
                             </div>
-                        })}
+                        </div>
+                    )}
+
+                    {media.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center gap-2 py-10 text-center">
+                            <ImageIcon size={28} className="text-[#0EA894]/40" />
+                            <p className="text-sm text-[#9CA3AF]">No media uploaded yet.</p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                            {media.map((m, index) => {
+                                const url = getMediaUrl(m);
+                                const type = getMediaType(m);
+                                return (
+                                    <div
+                                        key={m.id || index}
+                                        className="flex aspect-square items-center justify-center overflow-hidden rounded-xl border border-[#E5E7EB] bg-[#F9FAFB]"
+                                    >
+                                        {type.startsWith("image") ? (
+                                            <img src={url} alt="Product media" className="h-full w-full object-cover" />
+                                        ) : type.startsWith("video") ? (
+                                            <video src={url} controls className="h-full w-full object-cover" />
+                                        ) : type.startsWith("audio") ? (
+                                            <audio src={url} controls className="w-full px-2" />
+                                        ) : (
+                                            <a
+                                                href={url}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="flex flex-col items-center gap-1.5 text-xs font-medium text-[#0B6F60] hover:text-[#0EA894]"
+                                            >
+                                                <ExternalLink size={16} />
+                                                Open Media
+                                            </a>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -241,7 +370,6 @@ function ProductView() {
                 onConfirm={confirmDelete}
                 onCancel={cancelDelete}
             />
-
         </div>
     );
 }
