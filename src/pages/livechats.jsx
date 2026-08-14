@@ -367,7 +367,7 @@ function LiveChats() {
                                     onChange={handleFileSelect}
                                 />
 
-                                <div className="flex h-11 flex-1 items-center rounded-xl border border-[#E5E7EB] px-4 transition-all duration-200 focus-within:border-[#0EA894] focus-within:ring-2 focus-within:ring-[#0EA894]/20">
+                                <div className=" bg-gray-100 flex h-11 flex-1 items-center rounded-xl border border-[#E5E7EB] px-4 transition-all duration-200 focus-within:border-[#0EA894] focus-within:ring-2 focus-within:ring-[#0EA894]/20">
                                     <input
                                         type="text"
                                         placeholder="Type a message"
@@ -381,7 +381,7 @@ function LiveChats() {
                                 <button
                                     onClick={selectedFile ? sendAttachment : sendMessage}
                                     disabled={sending || (!message.trim() && !selectedFile)}
-                                    className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-[#0B6F60] text-white transition hover:bg-[#0B8A79] disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-[#0B6F60] text-white transition hover:bg-[#0B8A79] disabled:cursor-not-allowed"
                                 >
                                     <FaPaperPlane size={15} />
                                 </button>
