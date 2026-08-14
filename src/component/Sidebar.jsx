@@ -56,14 +56,8 @@ const NAV = [
   },
 ];
 
-export default function Sidebar({
-  onLogout,
-  email = "example@gmail.com",
-  username = "Admin",
-}) {
+export default function Sidebar({ isExpanded, setIsExpanded, onLogout, email = "example@gmail.com", username = "Admin" }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
-
   const sidebarRef = useRef(null);
 
   const closeSidebar = () => setIsOpen(false);
