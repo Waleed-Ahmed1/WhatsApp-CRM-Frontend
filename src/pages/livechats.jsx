@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaSearch, FaPhone, FaEllipsisV, FaPaperclip, FaMicrophone, FaSmile, FaPaperPlane, FaCheck, FaCheckDouble, FaWhatsapp, FaArrowLeft } from "react-icons/fa";
-import "../css/livechats.css";
-import { getcontactwithlastmessage, sendmessage, sendattachments } from "../api/livechats";
+import { FaSearch, FaPhone, FaEllipsisV, FaPaperclip, FaSmile, FaPaperPlane, FaCheck, FaWhatsapp, FaArrowLeft, FaUser } from "react-icons/fa";
 import { MdDoneAll, MdDone } from "react-icons/md";
-import { FaUser } from "react-icons/fa";
+import { getcontactwithlastmessage, sendmessage, sendattachments } from "../api/livechats";
 import toast from "react-hot-toast";
 
 function LiveChats() {
@@ -114,176 +112,210 @@ function LiveChats() {
         return name.includes(term) || waId.includes(term);
     });
 
-    // formats a full ISO timestamp (createdAt) into just "10:12 AM"
     const formatTime = (isoString) => {
         return new Date(isoString).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     };
 
-    // returns the right tick icon + color for an OUTGOING message, based on status
     const renderTicks = (status) => {
         if (status === "READ") {
-            return <MdDoneAll size={16} color="#53bdeb" className="tick-icon tick-read" />
+            return <MdDoneAll size={15} className="text-[#0EA894]" />
         }
         if (status === "DELIVERED") {
-            return <MdDone size={16} color="#8696a0" className="tick-icon tick-delivered" />;
+            return <MdDone size={15} className="text-gray-400" />;
         }
-        // SENT / PENDING (or PROCESSED/RECEIVED as a fallback) — single grey tick
-        return <FaCheck className="tick-icon tick-sent" />;
+        return <FaCheck size={11} className="text-gray-400" />;
     };
 
     return (
-        <div className={`livechat-page ${selectedContact ? "mobile-chat-open" : ""}`}>
+        <div className="flex h-full w-full overflow-hidden bg-[#EAF7F4]">
 
-            <div className="chat-list">
+            {/* CHAT LIST */}
+            <div className={`flex w-full flex-col border-r border-[#E5E7EB] bg-white md:w-[360px] md:flex-none ${selectedContact ? "hidden md:flex" : "flex"}`}>
 
                 {/* Header */}
-                <div className="chat-list-header">
-                    <div className="chat-header-title">
-                        <h2><FaWhatsapp size={18} color="#25D366" /> Live Chats</h2>
-                    </div>
-                    <button className="chat-search-btn" onClick={() => searchInputRef.current?.focus()}>
-                        <FaSearch />
+                <div className="flex items-center justify-between bg-[#0B6F60] px-5 py-4">
+                    <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
+                        <FaWhatsapp size={18} /> Live Chats
+                    </h2>
+                    <button
+                        onClick={() => searchInputRef.current?.focus()}
+                        className="flex h-9 w-9 items-center justify-center rounded-full text-white transition hover:bg-white/10"
+                    >
+                        <FaSearch size={14} />
                     </button>
                 </div>
 
                 {/* Search */}
-                <div className="chat-search">
-                    <FaSearch />
-                    <input
-                        ref={searchInputRef}
-                        type="text"
-                        placeholder="Search or start new chat"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
+                <div className="px-4 py-3">
+                    <div className="flex h-11 items-center gap-2 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 transition-all duration-200 focus-within:border-[#0EA894] focus-within:ring-2 focus-within:ring-[#0EA894]/20">
+                        <FaSearch size={13} className="text-[#9CA3AF]" />
+                        <input
+                            ref={searchInputRef}
+                            type="text"
+                            placeholder="Search or start new chat"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full bg-transparent text-sm text-[#1F2937] outline-none placeholder:text-[#9CA3AF]"
+                        />
+                    </div>
                 </div>
 
-                {/* Chat Items */}
-                <div className="chat-items">
+                {/* Chat items */}
+                <div className="flex-1 overflow-y-auto px-2 pb-3">
                     {filteredContacts.length === 0 ? (
-                        <div className="chat-list-empty">
-                            <FaWhatsapp size={36} />
-                            <p>{searchTerm ? "No contacts match your search." : contacterror}</p>
+                        <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
+                            <FaWhatsapp size={36} className="text-[#0EA894]/40" />
+                            <p className="text-sm text-[#6B7280]">
+                                {searchTerm ? "No contacts match your search." : contacterror}
+                            </p>
                         </div>
                     ) : (
-                        filteredContacts.map((con) => (
-                            <div
-                                className={`chat-item ${selectedContactId === con.id ? "active-chat" : ""}`}
-                                key={con.id}
-                                onClick={() => {
-                                    setSelectedContactId(con.id);
-                                    setSelectedContact(con);
-                                    setChatMessages(con.message || []);
-                                }}
-                            >
-                                <div className="chat-avatar">
-                                    <FaUser size={20} />
-                                    <span className="avatar-online"></span>
-                                </div>
-
-                                <div className="chat-info">
-                                    <div className="chat-name-row">
-                                        <span className="chat-name">
-                                            {con.name || con.waId}
-                                        </span>
-                                        <span className="chat-time">
-                                            {con.message?.[0]?.createdAt ? formatTime(con.message[0].createdAt) : "--:--"}
-                                        </span>
+                        filteredContacts.map((con) => {
+                            const isActive = selectedContactId === con.id;
+                            return (
+                                <div
+                                    key={con.id}
+                                    onClick={() => {
+                                        setSelectedContactId(con.id);
+                                        setSelectedContact(con);
+                                        setChatMessages(con.message || []);
+                                    }}
+                                    className={`flex cursor-pointer items-center gap-3 rounded-xl px-3 py-3 transition ${
+                                        isActive ? "bg-[#0EA894]/10" : "hover:bg-[#F3F4F6]"
+                                    }`}
+                                >
+                                    <div className="relative flex h-11 w-11 flex-none items-center justify-center rounded-full bg-[#0B6F60] text-white">
+                                        <FaUser size={16} />
+                                        <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-[#4ADE80]" />
                                     </div>
 
-                                    <div className="chat-message-row">
-                                        <span className="chat-last-message">
-                                            {con.message?.[0]?.body || "No messages yet"}
-                                        </span>
+                                    <div className="min-w-0 flex-1">
+                                        <div className="flex items-center justify-between gap-2">
+                                            <span className="truncate text-sm font-medium text-[#1F2937]">
+                                                {con.name || con.waId}
+                                            </span>
+                                            <span className="flex-none text-xs text-[#9CA3AF]">
+                                                {con.message?.[0]?.createdAt ? formatTime(con.message[0].createdAt) : "--:--"}
+                                            </span>
+                                        </div>
 
-                                        {con.unreadCount > 0 && (
-                                            <span className="unread-count">{con.unreadCount}</span>
-                                        )}
+                                        <div className="mt-0.5 flex items-center justify-between gap-2">
+                                            <span className="truncate text-xs text-[#6B7280]">
+                                                {con.message?.[0]?.body || "No messages yet"}
+                                            </span>
+
+                                            {con.unreadCount > 0 && (
+                                                <span className="flex h-5 min-w-5 flex-none items-center justify-center rounded-full bg-[#0EA894] px-1.5 text-[10px] font-semibold text-white">
+                                                    {con.unreadCount}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))
+                            );
+                        })
                     )}
                 </div>
             </div>
 
-            {/* RIGHT CHAT WINDOW */}
-            <div className="chat-window">
+            {/* CHAT WINDOW */}
+            <div className={`flex-1 flex-col bg-[#EAF7F4] ${selectedContact ? "flex" : "hidden md:flex"}`}>
 
                 {!selectedContact ? (
-                    <div className="chat-window-empty">
-                        <FaWhatsapp size={80} color="#25d366" />
-                        <h2>WhatsApp Chatbot Panel</h2>
-                        <p>Select a chat from the left to start viewing messages.</p>
+                    <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
+                        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
+                            <FaWhatsapp size={40} className="text-[#25D366]" />
+                        </div>
+                        <h2 className="text-lg font-semibold text-[#1F2937]">WhatsApp Chatbot Panel</h2>
+                        <p className="text-sm text-[#6B7280]">Select a chat from the left to start viewing messages.</p>
                     </div>
                 ) : (
                     <>
                         {/* Header */}
-                        <div className="chat-window-header">
-                            <div className="selected-user">
+                        <div className="flex items-center justify-between border-b border-[#E5E7EB] bg-white px-4 py-3">
+                            <div className="flex items-center gap-3">
                                 <button
-                                    className="chat-back-btn"
                                     onClick={() => {
                                         setSelectedContact(null);
                                         setSelectedContactId(null);
                                     }}
+                                    className="flex h-9 w-9 items-center justify-center rounded-full text-[#374151] transition hover:bg-[#F3F4F6] md:hidden"
                                 >
-                                    <FaArrowLeft />
+                                    <FaArrowLeft size={15} />
                                 </button>
-                                <div className="selected-avatar">
-                                    <FaUser size={18} />
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0B6F60] text-white">
+                                    <FaUser size={16} />
                                 </div>
-                                <div className="selected-user-info">
-                                    <h3>{selectedContact.name || selectedContact.waId}</h3>
+                                <div>
+                                    <h3 className="text-sm font-semibold text-[#1F2937]">
+                                        {selectedContact.name || selectedContact.waId}
+                                    </h3>
                                     {selectedContact.name && (
-                                        <span>{selectedContact.waId}</span>
+                                        <span className="text-xs text-[#6B7280]">{selectedContact.waId}</span>
                                     )}
                                 </div>
                             </div>
 
-                            <div className="chat-actions">
-                                <button onClick={() => { }}><FaPhone /></button>
-                                <button onClick={() => { }}><FaEllipsisV /></button>
+                            <div className="flex items-center gap-1">
+                                <button className="flex h-9 w-9 items-center justify-center rounded-full text-[#374151] transition hover:bg-[#F3F4F6]">
+                                    <FaPhone size={14} />
+                                </button>
+                                <button className="flex h-9 w-9 items-center justify-center rounded-full text-[#374151] transition hover:bg-[#F3F4F6]">
+                                    <FaEllipsisV size={14} />
+                                </button>
                             </div>
                         </div>
 
                         {/* Messages */}
-                        <div className="messages-area">
+                        <div className="flex-1 space-y-2 overflow-y-auto px-4 py-4 sm:px-8">
 
-                            <div className="chat-date">
-                                <span>Today</span>
+                            <div className="flex justify-center">
+                                <span className="rounded-full bg-white px-3 py-1 text-xs text-[#6B7280] shadow-sm">Today</span>
                             </div>
 
                             {chatMessages.length === 0 ? (
-                                <p className="no-messages-text">No messages yet.</p>
+                                <p className="pt-10 text-center text-sm text-[#9CA3AF]">No messages yet.</p>
                             ) : (
                                 chatMessages.map((msg) => {
                                     const isSent = msg.direction === "OUTGOING";
 
                                     return (
-                                        <div className={`message-row ${isSent ? "sent" : "received"}`} key={msg.id}>
-                                            <div className="message-bubble">
+                                        <div key={msg.id} className={`flex ${isSent ? "justify-end" : "justify-start"}`}>
+                                            <div
+                                                className={`max-w-[75%] rounded-2xl px-3.5 py-2.5 shadow-sm sm:max-w-[60%] ${
+                                                    isSent
+                                                        ? "rounded-tr-sm bg-[#0EA894] text-white"
+                                                        : "rounded-tl-sm bg-white text-[#1F2937]"
+                                                }`}
+                                            >
                                                 {msg.type === "image" && msg.mediaUrl && (
-                                                    <img src={msg.mediaUrl} alt="attachment" className="message-media-image" />
+                                                    <img src={msg.mediaUrl} alt="attachment" className="mb-1.5 max-h-64 w-full rounded-xl object-cover" />
                                                 )}
                                                 {msg.type === "video" && msg.mediaUrl && (
-                                                    <video src={msg.mediaUrl} controls className="message-media-video" />
+                                                    <video src={msg.mediaUrl} controls className="mb-1.5 max-h-64 w-full rounded-xl" />
                                                 )}
                                                 {msg.type === "audio" && msg.mediaUrl && (
-                                                    <audio src={msg.mediaUrl} controls className="message-media-audio" />
+                                                    <audio src={msg.mediaUrl} controls className="mb-1.5 w-full" />
                                                 )}
                                                 {msg.type === "document" && msg.mediaUrl && (
-                                                    <a href={msg.mediaUrl} target="_blank" rel="noreferrer" className="message-media-doc">
+                                                    <a
+                                                        href={msg.mediaUrl}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className={`mb-1.5 flex items-center gap-2 rounded-xl px-3 py-2 text-sm underline ${
+                                                            isSent ? "bg-white/15" : "bg-[#F3F4F6]"
+                                                        }`}
+                                                    >
                                                         📄 {msg.fileName || "Document"}
                                                     </a>
                                                 )}
 
-                                                {msg.body && <p>{msg.body}</p>}
+                                                {msg.body && <p className="text-sm leading-relaxed">{msg.body}</p>}
 
-                                                <span className="message-time">
+                                                <div className={`mt-1 flex items-center justify-end gap-1 text-[10px] ${isSent ? "text-white/70" : "text-[#9CA3AF]"}`}>
                                                     {formatTime(msg.createdAt)}
                                                     {isSent && renderTicks(msg.status)}
-                                                </span>
+                                                </div>
                                             </div>
                                         </div>
                                     );
@@ -292,28 +324,40 @@ function LiveChats() {
                         </div>
 
                         {/* Input */}
-                        <div className="message-input-area-wrap">
+                        <div className="border-t border-[#E5E7EB] bg-white px-4 py-3">
                             {selectedFile && (
-                                <div className="selected-file-pill">
-                                    <span>{selectedFile.name}</span>
-                                    <button onClick={() => setSelectedFile(null)}>✕</button>
+                                <div className="mb-2 flex w-fit items-center gap-2 rounded-full bg-[#0EA894]/10 px-3 py-1.5 text-xs text-[#0B6F60]">
+                                    <span className="max-w-[200px] truncate">{selectedFile.name}</span>
+                                    <button onClick={() => setSelectedFile(null)} className="text-[#0B6F60] hover:text-[#0EA894]">✕</button>
                                 </div>
                             )}
 
                             {showEmojiPicker && (
-                                <div className="emoji-picker">
+                                <div className="mb-2 flex flex-wrap gap-1 rounded-xl border border-[#E5E7EB] bg-white p-2 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
                                     {commonEmojis.map((emoji) => (
-                                        <button key={emoji} onClick={() => addEmoji(emoji)}>{emoji}</button>
+                                        <button
+                                            key={emoji}
+                                            onClick={() => addEmoji(emoji)}
+                                            className="flex h-9 w-9 items-center justify-center rounded-lg text-lg transition hover:bg-[#F3F4F6]"
+                                        >
+                                            {emoji}
+                                        </button>
                                     ))}
                                 </div>
                             )}
 
-                            <div className="message-input-area">
-                                <button className="message-icon-btn" onClick={() => setShowEmojiPicker((p) => !p)}>
-                                    <FaSmile />
+                            <div className="flex items-center gap-1.5">
+                                <button
+                                    onClick={() => setShowEmojiPicker((p) => !p)}
+                                    className="flex h-10 w-10 flex-none items-center justify-center rounded-full text-[#6B7280] transition hover:bg-[#F3F4F6]"
+                                >
+                                    <FaSmile size={17} />
                                 </button>
-                                <button className="message-icon-btn" onClick={() => fileInputRef.current?.click()}>
-                                    <FaPaperclip />
+                                <button
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="flex h-10 w-10 flex-none items-center justify-center rounded-full text-[#6B7280] transition hover:bg-[#F3F4F6]"
+                                >
+                                    <FaPaperclip size={16} />
                                 </button>
                                 <input
                                     type="file"
@@ -322,19 +366,24 @@ function LiveChats() {
                                     accept="image/*,video/*,audio/*,.pdf,.doc,.docx"
                                     onChange={handleFileSelect}
                                 />
-                                <input
-                                    type="text"
-                                    placeholder="Type a message"
-                                    value={message}
-                                    onChange={(e) => setmessage(e.target.value)}
-                                    onKeyDown={(e) => e.key === "Enter" && (selectedFile ? sendAttachment() : sendMessage())}
-                                />
+
+                                <div className=" bg-gray-200 flex h-11 flex-1 items-center rounded-xl border border-[#E5E7EB] px-4 transition-all duration-200 focus-within:border-[#0EA894] focus-within:ring-2 focus-within:ring-[#0EA894]/20">
+                                    <input
+                                        type="text"
+                                        placeholder="Type a message"
+                                        value={message}
+                                        onChange={(e) => setmessage(e.target.value)}
+                                        onKeyDown={(e) => e.key === "Enter" && (selectedFile ? sendAttachment() : sendMessage())}
+                                        className="w-full bg-transparent text-sm text-[#1F2937] outline-none placeholder:text-[#9CA3AF]"
+                                    />
+                                </div>
+
                                 <button
-                                    className="send-message-btn"
                                     onClick={selectedFile ? sendAttachment : sendMessage}
                                     disabled={sending || (!message.trim() && !selectedFile)}
+                                    className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-[#0B6F60] text-white transition hover:bg-[#0B8A79] disabled:cursor-not-allowed"
                                 >
-                                    <FaPaperPlane />
+                                    <FaPaperPlane size={15} />
                                 </button>
                             </div>
                         </div>
