@@ -91,7 +91,7 @@ export default function Sidebar({ isExpanded, setIsExpanded, onLogout, email = "
           ☰
         </button>
 
-        <span className="font-semibold text-white">WhatsApp Panel</span>
+        <span className="font-semibold text-white">WhatsApp Chatbot CRM</span>
       </div>
 
 
