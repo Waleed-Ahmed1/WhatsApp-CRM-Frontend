@@ -629,24 +629,24 @@ function LiveChats() {
                               : "rounded-tl-sm bg-white text-[#1F2937]"
                               }`}
                           >
-                            {msg.type.toLowerCase() === "image" && msg.mediaUrl && (
+                            {msg.type?.toLowerCase() === "image" && msg.mediaUrl && (
                               <img
                                 src={msg.mediaUrl}
                                 alt="attachment"
                                 className="mb-1.5 max-h-64 w-full rounded-xl object-cover"
                               />
                             )}
-                            {msg.type.toLowerCase() === "video" && msg.mediaUrl && (
+                            {msg.type?.toLowerCase() === "video" && msg.mediaUrl && (
                               <video
                                 src={msg.mediaUrl}
                                 controls
                                 className="mb-1.5 max-h-64 w-full rounded-xl"
                               />
                             )}
-                            {msg.type.toLowerCase() === "audio" && msg.mediaUrl && (
+                            {msg.type?.toLowerCase() === "audio" && msg.mediaUrl && (
                               <VoiceNote src={msg.mediaUrl} isSent={isSent} />
                             )}
-                            {msg.type.toLowerCase() === "document" && msg.mediaUrl && (
+                            {msg.type?.toLowerCase() === "document" && msg.mediaUrl && (
                               <a
                                 href={msg.mediaUrl}
                                 target="_blank"
