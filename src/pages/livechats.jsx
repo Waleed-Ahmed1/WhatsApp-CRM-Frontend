@@ -598,7 +598,7 @@ function LiveChats() {
               />
 
               {/* Scrollable messages layer sits on top; only this scrolls */}
-              <div className="relative h-full overflow-y-auto px-4 py-4 sm:px-8 pb-24">
+              <div className="chat-scroll relative h-full overflow-y-auto px-4 py-4 sm:px-8 pb-24">
                 <div className="space-y-2">
                   <div className="flex justify-center">
                     <span className="rounded-full bg-white px-3 py-1 text-xs text-[#6B7280] shadow-sm">
