@@ -4,8 +4,6 @@ import { getusers, deleteusers } from "../api/users";
 import ConfirmDialog from "../component/ConfirmDailog";
 import { Users, MoreVertical, Trash2, Plus, AlertCircle } from "lucide-react";
 
-// Rotates through your teal-family + a few complementary accents,
-// same spirit as the reference's varied pastel avatar colors
 const AVATAR_COLORS = [
     "bg-[#0EA894]", "bg-[#0B6F60]", "bg-[#F59E0B]", "bg-[#8B5CF6]",
     "bg-[#EC4899]", "bg-[#3B82F6]", "bg-[#10B981]", "bg-[#F97316]",

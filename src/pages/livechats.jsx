@@ -19,8 +19,128 @@ import {
   getcontactchathistory,
 } from "../api/livechats";
 import toast from "react-hot-toast";
+function VoiceNote({ src, isSent }) {
+  const audioRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const setAudioData = () => {
+      if (isFinite(audio.duration)) setDuration(audio.duration);
+    };
+    const updateTime = () => setCurrentTime(audio.currentTime);
+    const onEnd = () => {
+      setIsPlaying(false);
+      setCurrentTime(0);
+    };
+
+    audio.addEventListener("loadedmetadata", setAudioData);
+    audio.addEventListener("timeupdate", updateTime);
+    audio.addEventListener("ended", onEnd);
+
+    return () => {
+      audio.removeEventListener("loadedmetadata", setAudioData);
+      audio.removeEventListener("timeupdate", updateTime);
+      audio.removeEventListener("ended", onEnd);
+    };
+  }, []);
+
+  const togglePlay = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (isPlaying) {
+      audio.pause();
+    } else {
+      audio.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  const handleSeek = (e) => {
+    const audio = audioRef.current;
+    if (!audio || !duration) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const ratio = (e.clientX - rect.left) / rect.width;
+    const newTime = ratio * duration;
+    audio.currentTime = newTime;
+    setCurrentTime(newTime);
+  };
+
+  const formatDuration = (secs) => {
+    if (!secs || !isFinite(secs)) return "0:00";
+    const m = Math.floor(secs / 60);
+    const s = Math.floor(secs % 60);
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
+
+  const progress = duration ? (currentTime / duration) * 100 : 0;
+
+  // Static "waveform" bar heights for a WhatsApp-like look
+  const bars = [6, 12, 8, 16, 10, 18, 9, 14, 7, 15, 11, 17, 8, 13, 6, 16, 10, 9, 14, 7];
+
+  return (
+    <div className="mb-1 flex items-center gap-2 min-w-[220px]">
+      <audio ref={audioRef} src={src} preload="metadata" />
+
+      <button
+        onClick={togglePlay}
+        className={`flex h-9 w-9 flex-none items-center justify-center rounded-full transition ${isSent ? "bg-white/20 hover:bg-white/30" : "bg-[#0EA894]/10 hover:bg-[#0EA894]/20"
+          }`}
+      >
+        {isPlaying ? (
+          <svg width="14" height="14" viewBox="0 0 24 24" fill={isSent ? "#fff" : "#0B6F60"}>
+            <rect x="6" y="5" width="4" height="14" rx="1" />
+            <rect x="14" y="5" width="4" height="14" rx="1" />
+          </svg>
+        ) : (
+          <svg width="14" height="14" viewBox="0 0 24 24" fill={isSent ? "#fff" : "#0B6F60"}>
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        )}
+      </button>
+
+      <div className="flex flex-1 flex-col gap-1">
+        {/* Waveform / progress track */}
+        <div
+          onClick={handleSeek}
+          className="relative flex h-6 flex-1 cursor-pointer items-center gap-[2px]"
+        >
+          {bars.map((h, i) => {
+            const barPos = (i / bars.length) * 100;
+            const isFilled = barPos <= progress;
+            return (
+              <span
+                key={i}
+                style={{ height: `${h}px` }}
+                className={`w-[3px] flex-1 rounded-full transition-colors ${isSent
+                  ? isFilled
+                    ? "bg-white"
+                    : "bg-white/35"
+                  : isFilled
+                    ? "bg-[#0EA894]"
+                    : "bg-[#D1D5DB]"
+                  }`}
+              />
+            );
+          })}
+        </div>
+
+        <span
+          className={`text-[10px] ${isSent ? "text-white/70" : "text-[#9CA3AF]"}`}
+        >
+          {formatDuration(isPlaying || currentTime ? currentTime : duration)}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 function LiveChats() {
+  const emojiPickerRef = useRef(null);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [contacts, setcontacts] = useState([]);
   const [selectedContactId, setSelectedContactId] = useState(null);
@@ -33,11 +153,58 @@ function LiveChats() {
   );
   const [searchTerm, setSearchTerm] = useState("");
   const searchInputRef = useRef(null);
+  const [unreadContactIds, setUnreadContactIds] = useState(() => new Set());
+  const selectedContactIdRef = useRef(null);
+  useEffect(() => {
+    selectedContactIdRef.current = selectedContactId;
+  }, [selectedContactId]);
+  const lastSeenSignatureRef = useRef({});
+
+  const getMessageSignature = (con) =>
+    con?.message?.[0]?.id ?? con?.message?.[0]?.createdAt ?? null;
 
   const getcontactWithlastMessage = async () => {
     try {
       const res = await getcontactwithlastmessage();
-      setcontacts(res.data.contactList);
+      const rawContacts = res.data.contactList || [];
+
+      // Figure out which contacts got a new message since the last poll.
+      setUnreadContactIds((prevUnread) => {
+        const nextUnread = new Set(prevUnread);
+
+        rawContacts.forEach((con) => {
+          const signature = getMessageSignature(con);
+          const previousSignature = lastSeenSignatureRef.current[con.id];
+          const isFirstTimeSeen = previousSignature === undefined;
+
+          if (
+            !isFirstTimeSeen &&
+            signature !== null &&
+            signature !== previousSignature &&
+            con.id !== selectedContactIdRef.current
+          ) {
+            // A new message arrived for a contact whose chat isn't open.
+            nextUnread.add(con.id);
+          }
+
+          lastSeenSignatureRef.current[con.id] = signature;
+        });
+
+        return nextUnread;
+      });
+
+      const newContacts = sortContacts(rawContacts);
+
+      setcontacts((prevContacts) => {
+        const previous = JSON.stringify(prevContacts);
+        const current = JSON.stringify(newContacts);
+
+        if (previous !== current) {
+          return newContacts;
+        }
+
+        return prevContacts;
+      });
     } catch (err) {
       console.error("Contact error:", err);
       setcontacterror("Failed to load contacts. Please try again.");
@@ -47,6 +214,12 @@ function LiveChats() {
 
   useEffect(() => {
     getcontactWithlastMessage();
+
+    const interval = setInterval(() => {
+      getcontactWithlastMessage();
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const [message, setmessage] = useState("");
@@ -69,6 +242,23 @@ function LiveChats() {
     "👏",
     "✅",
   ];
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        showEmojiPicker &&
+        emojiPickerRef.current &&
+        !emojiPickerRef.current.contains(event.target)
+      ) {
+        setShowEmojiPicker(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showEmojiPicker]);
 
   const addEmoji = (emoji) => {
     setmessage((prev) => prev + emoji);
@@ -78,6 +268,17 @@ function LiveChats() {
     const file = e.target.files[0];
     if (file) setSelectedFile(file);
     e.target.value = "";
+  };
+
+  const openContact = (con) => {
+    setSelectedContactId(con.id);
+    setSelectedContact(con);
+    setUnreadContactIds((prev) => {
+      if (!prev.has(con.id)) return prev;
+      const next = new Set(prev);
+      next.delete(con.id);
+      return next;
+    });
   };
 
   const sendMessage = async () => {
@@ -145,7 +346,6 @@ function LiveChats() {
     const waId = (con.waId || "").toLowerCase();
     return name.includes(term) || waId.includes(term);
   });
-
   const formatTime = (isoString) => {
     return new Date(isoString).toLocaleTimeString([], {
       hour: "2-digit",
@@ -168,23 +368,65 @@ function LiveChats() {
       return;
     }
 
-    const fetchChatHistory = async () => {
-      setLoadingMessages(true);
+    const fetchChatHistory = async (showLoader = false) => {
+      if (showLoader) {
+        setLoadingMessages(true);
+      }
+
       try {
         const res = await getcontactchathistory(selectedContactId);
 
-        setChatMessages(res.data.chatHistory);
+        setChatMessages((prev) => {
+          const previous = JSON.stringify(prev);
+          const current = JSON.stringify(res.data.chatHistory);
+
+          if (previous !== current) {
+            return res.data.chatHistory;
+          }
+
+          return prev;
+        });
       } catch (err) {
         console.error("Chat history error:", err);
-        toast.error("Failed to load chat history");
-        setChatMessages([]);
+
+        if (showLoader) {
+          toast.error("Failed to load chat history");
+        }
       } finally {
-        setLoadingMessages(false);
+        if (showLoader) {
+          setLoadingMessages(false);
+        }
       }
     };
 
-    fetchChatHistory();
+    fetchChatHistory(true);
+
+    const interval = setInterval(() => {
+      fetchChatHistory(false);
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, [selectedContactId]);
+
+  // Contacts with an unread message are sorted first (newest message first
+  // within that group), then the rest of the contacts, also newest first.
+  const sortContacts = (contactList = []) => {
+    const getTime = (con) => {
+      const createdAt = con.message?.[0]?.createdAt;
+      return createdAt ? new Date(createdAt).getTime() : 0;
+    };
+
+    return [...contactList].sort((a, b) => {
+      const aUnread = unreadContactIds.has(a.id) ? 1 : 0;
+      const bUnread = unreadContactIds.has(b.id) ? 1 : 0;
+
+      if (aUnread !== bUnread) {
+        return bUnread - aUnread; // unread contacts bubble to the top
+      }
+
+      return getTime(b) - getTime(a);
+    });
+  };
 
   return (
     <div className="flex h-full w-full overflow-hidden bg-[#EAF7F4]">
@@ -232,18 +474,13 @@ function LiveChats() {
           ) : (
             filteredContacts.map((con) => {
               const isActive = selectedContactId === con.id;
+              const isUnread = unreadContactIds.has(con.id);
               return (
                 <div
                   key={con.id}
-                  onClick={() => {
-                    setSelectedContactId(con.id);
-                    setSelectedContact(con);
-                    setSelectedContactId(con.id);
-                    setSelectedContact(con);
-                  }}
-                  className={`flex cursor-pointer items-center gap-3 rounded-xl px-3 py-3 transition mb-2 shadow-md ${
-                    isActive ? "bg-gray-200" : "bg-gray-50"
-                  }`}
+                  onClick={() => openContact(con)}
+                  className={`flex cursor-pointer items-center gap-3 rounded-xl px-3 py-3 transition mb-2 shadow-md ${isActive ? "bg-gray-200" : isUnread ? "bg-[#EAF7F4]" : "bg-gray-50"
+                    }`}
                 >
                   <div className="relative flex h-11 w-11 flex-none items-center justify-center rounded-full bg-[#0B6F60] text-white">
                     <FaUser size={16} />
@@ -252,10 +489,14 @@ function LiveChats() {
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="truncate text-sm font-medium text-[#1F2937]">
+                      <span
+                        className={`truncate text-sm text-[#1F2937] ${isUnread ? "font-bold" : "font-medium"}`}
+                      >
                         {con.name || con.waId}
                       </span>
-                      <span className="flex-none text-xs text-[#9CA3AF]">
+                      <span
+                        className={`flex-none text-xs ${isUnread ? "font-semibold text-[#0B6F60]" : "text-[#9CA3AF]"}`}
+                      >
                         {con.message?.[0]?.createdAt
                           ? formatTime(con.message[0].createdAt)
                           : "--:--"}
@@ -263,14 +504,22 @@ function LiveChats() {
                     </div>
 
                     <div className="mt-0.5 flex items-center justify-between gap-2">
-                      <span className="truncate text-xs text-[#6B7280]">
+                      <span
+                        className={`truncate text-xs ${isUnread ? "font-semibold text-[#1F2937]" : "text-[#6B7280]"}`}
+                      >
                         {con.message?.[0]?.body || "No messages yet"}
                       </span>
 
-                      {con.unreadCount > 0 && (
-                        <span className="flex h-5 min-w-5 flex-none items-center justify-center rounded-full bg-[#0EA894] px-1.5 text-[10px] font-semibold text-white">
-                          {con.unreadCount}
+                      {isUnread ? (
+                        <span className="flex h-5 flex-none items-center justify-center rounded-full bg-[#0EA894] px-2 text-[10px] font-semibold uppercase tracking-wide text-white">
+                          Unread
                         </span>
+                      ) : (
+                        con.unreadCount > 0 && (
+                          <span className="flex h-5 min-w-5 flex-none items-center justify-center rounded-full bg-[#0EA894] px-1.5 text-[10px] font-semibold text-white">
+                            {con.unreadCount}
+                          </span>
+                        )
                       )}
                     </div>
                   </div>
@@ -375,41 +624,35 @@ function LiveChats() {
                           className={`flex ${isSent ? "justify-end" : "justify-start"}`}
                         >
                           <div
-                            className={`max-w-[75%] rounded-2xl px-3.5 py-2.5 shadow-sm sm:max-w-[60%] ${
-                              isSent
-                                ? "rounded-tr-sm bg-[#0EA894] text-white"
-                                : "rounded-tl-sm bg-white text-[#1F2937]"
-                            }`}
+                            className={`max-w-[75%] rounded-2xl px-3.5 py-2.5 shadow-sm sm:max-w-[60%] ${isSent
+                              ? "rounded-tr-sm bg-[#0EA894] text-white"
+                              : "rounded-tl-sm bg-white text-[#1F2937]"
+                              }`}
                           >
-                            {msg.type === "image" && msg.mediaUrl && (
+                            {msg.type.toLowerCase() === "image" && msg.mediaUrl && (
                               <img
                                 src={msg.mediaUrl}
                                 alt="attachment"
                                 className="mb-1.5 max-h-64 w-full rounded-xl object-cover"
                               />
                             )}
-                            {msg.type === "video" && msg.mediaUrl && (
+                            {msg.type.toLowerCase() === "video" && msg.mediaUrl && (
                               <video
                                 src={msg.mediaUrl}
                                 controls
                                 className="mb-1.5 max-h-64 w-full rounded-xl"
                               />
                             )}
-                            {msg.type === "audio" && msg.mediaUrl && (
-                              <audio
-                                src={msg.mediaUrl}
-                                controls
-                                className="mb-1.5 w-full"
-                              />
+                            {msg.type.toLowerCase() === "audio" && msg.mediaUrl && (
+                              <VoiceNote src={msg.mediaUrl} isSent={isSent} />
                             )}
-                            {msg.type === "document" && msg.mediaUrl && (
+                            {msg.type.toLowerCase() === "document" && msg.mediaUrl && (
                               <a
                                 href={msg.mediaUrl}
                                 target="_blank"
                                 rel="noreferrer"
-                                className={`mb-1.5 flex items-center gap-2 rounded-xl px-3 py-2 text-sm underline ${
-                                  isSent ? "bg-white/15" : "bg-[#F3F4F6]"
-                                }`}
+                                className={`mb-1.5 flex items-center gap-2 rounded-xl px-3 py-2 text-sm underline ${isSent ? "bg-white/15" : "bg-[#F3F4F6]"
+                                  }`}
                               >
                                 📄 {msg.fileName || "Document"}
                               </a>
@@ -453,7 +696,10 @@ function LiveChats() {
               )}
 
               {showEmojiPicker && (
-                <div className="mb-2 flex flex-wrap gap-1 rounded-xl border border-[#E5E7EB] bg-white p-2 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
+                <div
+                  ref={emojiPickerRef}
+                  className="mb-2 flex flex-wrap gap-1 rounded-xl border border-[#E5E7EB] bg-white p-2 shadow-[0_4px_12px_rgba(0,0,0,0.08)]"
+                >
                   {commonEmojis.map((emoji) => (
                     <button
                       key={emoji}
