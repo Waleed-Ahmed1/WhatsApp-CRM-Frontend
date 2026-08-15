@@ -19,8 +19,128 @@ import {
   getcontactchathistory,
 } from "../api/livechats";
 import toast from "react-hot-toast";
+function VoiceNote({ src, isSent }) {
+  const audioRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const setAudioData = () => {
+      if (isFinite(audio.duration)) setDuration(audio.duration);
+    };
+    const updateTime = () => setCurrentTime(audio.currentTime);
+    const onEnd = () => {
+      setIsPlaying(false);
+      setCurrentTime(0);
+    };
+
+    audio.addEventListener("loadedmetadata", setAudioData);
+    audio.addEventListener("timeupdate", updateTime);
+    audio.addEventListener("ended", onEnd);
+
+    return () => {
+      audio.removeEventListener("loadedmetadata", setAudioData);
+      audio.removeEventListener("timeupdate", updateTime);
+      audio.removeEventListener("ended", onEnd);
+    };
+  }, []);
+
+  const togglePlay = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (isPlaying) {
+      audio.pause();
+    } else {
+      audio.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  const handleSeek = (e) => {
+    const audio = audioRef.current;
+    if (!audio || !duration) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const ratio = (e.clientX - rect.left) / rect.width;
+    const newTime = ratio * duration;
+    audio.currentTime = newTime;
+    setCurrentTime(newTime);
+  };
+
+  const formatDuration = (secs) => {
+    if (!secs || !isFinite(secs)) return "0:00";
+    const m = Math.floor(secs / 60);
+    const s = Math.floor(secs % 60);
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
+
+  const progress = duration ? (currentTime / duration) * 100 : 0;
+
+  // Static "waveform" bar heights for a WhatsApp-like look
+  const bars = [6, 12, 8, 16, 10, 18, 9, 14, 7, 15, 11, 17, 8, 13, 6, 16, 10, 9, 14, 7];
+
+  return (
+    <div className="mb-1 flex items-center gap-2 min-w-[220px]">
+      <audio ref={audioRef} src={src} preload="metadata" />
+
+      <button
+        onClick={togglePlay}
+        className={`flex h-9 w-9 flex-none items-center justify-center rounded-full transition ${isSent ? "bg-white/20 hover:bg-white/30" : "bg-[#0EA894]/10 hover:bg-[#0EA894]/20"
+          }`}
+      >
+        {isPlaying ? (
+          <svg width="14" height="14" viewBox="0 0 24 24" fill={isSent ? "#fff" : "#0B6F60"}>
+            <rect x="6" y="5" width="4" height="14" rx="1" />
+            <rect x="14" y="5" width="4" height="14" rx="1" />
+          </svg>
+        ) : (
+          <svg width="14" height="14" viewBox="0 0 24 24" fill={isSent ? "#fff" : "#0B6F60"}>
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        )}
+      </button>
+
+      <div className="flex flex-1 flex-col gap-1">
+        {/* Waveform / progress track */}
+        <div
+          onClick={handleSeek}
+          className="relative flex h-6 flex-1 cursor-pointer items-center gap-[2px]"
+        >
+          {bars.map((h, i) => {
+            const barPos = (i / bars.length) * 100;
+            const isFilled = barPos <= progress;
+            return (
+              <span
+                key={i}
+                style={{ height: `${h}px` }}
+                className={`w-[3px] flex-1 rounded-full transition-colors ${isSent
+                  ? isFilled
+                    ? "bg-white"
+                    : "bg-white/35"
+                  : isFilled
+                    ? "bg-[#0EA894]"
+                    : "bg-[#D1D5DB]"
+                  }`}
+              />
+            );
+          })}
+        </div>
+
+        <span
+          className={`text-[10px] ${isSent ? "text-white/70" : "text-[#9CA3AF]"}`}
+        >
+          {formatDuration(isPlaying || currentTime ? currentTime : duration)}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 function LiveChats() {
+  const emojiPickerRef = useRef(null);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [contacts, setcontacts] = useState([]);
   const [selectedContactId, setSelectedContactId] = useState(null);
@@ -38,7 +158,6 @@ function LiveChats() {
   useEffect(() => {
     selectedContactIdRef.current = selectedContactId;
   }, [selectedContactId]);
-
   const lastSeenSignatureRef = useRef({});
 
   const getMessageSignature = (con) =>
@@ -123,6 +242,23 @@ function LiveChats() {
     "👏",
     "✅",
   ];
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        showEmojiPicker &&
+        emojiPickerRef.current &&
+        !emojiPickerRef.current.contains(event.target)
+      ) {
+        setShowEmojiPicker(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showEmojiPicker]);
 
   const addEmoji = (emoji) => {
     setmessage((prev) => prev + emoji);
@@ -493,28 +629,24 @@ function LiveChats() {
                               : "rounded-tl-sm bg-white text-[#1F2937]"
                               }`}
                           >
-                            {msg.type === "image" && msg.mediaUrl && (
+                            {msg.type.toLowerCase() === "image" && msg.mediaUrl && (
                               <img
                                 src={msg.mediaUrl}
                                 alt="attachment"
                                 className="mb-1.5 max-h-64 w-full rounded-xl object-cover"
                               />
                             )}
-                            {msg.type === "video" && msg.mediaUrl && (
+                            {msg.type.toLowerCase() === "video" && msg.mediaUrl && (
                               <video
                                 src={msg.mediaUrl}
                                 controls
                                 className="mb-1.5 max-h-64 w-full rounded-xl"
                               />
                             )}
-                            {msg.type === "audio" && msg.mediaUrl && (
-                              <audio
-                                src={msg.mediaUrl}
-                                controls
-                                className="mb-1.5 w-full"
-                              />
+                            {msg.type.toLowerCase() === "audio" && msg.mediaUrl && (
+                              <VoiceNote src={msg.mediaUrl} isSent={isSent} />
                             )}
-                            {msg.type === "document" && msg.mediaUrl && (
+                            {msg.type.toLowerCase() === "document" && msg.mediaUrl && (
                               <a
                                 href={msg.mediaUrl}
                                 target="_blank"
@@ -564,7 +696,10 @@ function LiveChats() {
               )}
 
               {showEmojiPicker && (
-                <div className="mb-2 flex flex-wrap gap-1 rounded-xl border border-[#E5E7EB] bg-white p-2 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
+                <div
+                  ref={emojiPickerRef}
+                  className="mb-2 flex flex-wrap gap-1 rounded-xl border border-[#E5E7EB] bg-white p-2 shadow-[0_4px_12px_rgba(0,0,0,0.08)]"
+                >
                   {commonEmojis.map((emoji) => (
                     <button
                       key={emoji}
