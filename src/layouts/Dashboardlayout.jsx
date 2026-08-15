@@ -40,7 +40,7 @@ export default function DashboardLayout() {
     };
 
     checkStatus();
-    const interval = setInterval(checkStatus, 5000);
+    const interval = setInterval(checkStatus, 30000);
     return () => clearInterval(interval);
   }, []);
 
