@@ -355,12 +355,12 @@ function LiveChats() {
 
   const renderTicks = (status) => {
     if (status === "READ") {
-      return <MdDoneAll size={15} className="text-[#0EA894]" />;
+      return <MdDoneAll size={15} className="text-[#ffffff]" />;
     }
     if (status === "DELIVERED") {
-      return <MdDone size={15} className="text-gray-400" />;
+      return <MdDone size={15} className="text-[#ffffff]" />;
     }
-    return <FaCheck size={11} className="text-gray-400" />;
+    return <FaCheck size={11} className="text-[#ffffff]" />;
   };
   useEffect(() => {
     if (!selectedContactId) {
@@ -663,12 +663,17 @@ function LiveChats() {
                                 {msg.body}
                               </p>
                             )}
-
                             <div
-                              className={`mt-1 flex items-center justify-end gap-1 text-[10px] ${isSent ? "text-white/70" : "text-[#9CA3AF]"}`}
+                              className={`mt-1 flex items-center justify-end gap-1 text-[10px] ${isSent ? "text-white/70" : "text-[#9CA3AF]"
+                                }`}
                             >
                               {formatTime(msg.createdAt)}
-                              {isSent && renderTicks(msg.status)}
+
+                              {isSent && (
+                                <span className="uppercase">
+                                  {msg.status}
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
