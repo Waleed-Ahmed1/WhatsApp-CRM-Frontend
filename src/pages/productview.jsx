@@ -144,6 +144,7 @@ function ProductView() {
             setmediadeleteid('');
         } catch (err) {
             toast.error(err.response?.data?.message || "Failed to delete media");
+            setmediadeleteid('');
         }
     };
 
@@ -371,9 +372,11 @@ function ProductView() {
                             {media.map((m, index) => {
                                 const url = getMediaUrl(m);
                                 const type = getMediaType(m);
+                                const mediaId = m.id || m._id || m.mediaId || m.media_id;
+                                
                                 return (
                                     <div
-                                        key={m.id || index}
+                                        key={mediaId || index}
                                         className="group relative flex aspect-square items-center justify-center overflow-hidden rounded-xl border border-[#E5E7EB] bg-[#F9FAFB]"
                                     >
                                         {type.startsWith("image") ? (
@@ -393,16 +396,19 @@ function ProductView() {
                                                 Open Media
                                             </a>
                                         )}
-                                        <button
-                                            onClick={() => {
-                                                setmediadeleteid(m.id);
-                                                mediadelete();
-                                            }}
-                                            className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity hover:bg-red-500 group-hover:opacity-100"
-                                            title="Delete media"
-                                        >
-                                            <X size={14} />
-                                        </button>
+                                        
+                                        {mediaId && (
+                                            <button
+                                                onClick={() => {
+                                                    setmediadeleteid(mediaId);
+                                                    mediadelete();
+                                                }}
+                                                className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity hover:bg-red-500 group-hover:opacity-100"
+                                                title="Delete media"
+                                            >
+                                                <X size={14} />
+                                            </button>
+                                        )}
                                     </div>
                                 );
                             })}
