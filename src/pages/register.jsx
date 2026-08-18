@@ -13,25 +13,62 @@ function Register() {
 
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [emailError, setEmailError] = useState("");
+
+    const validateEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (email && !emailRegex.test(email)) {
+            setEmailError("Please enter a valid email address");
+            return false;
+        }
+        setEmailError("");
+        return true;
+    };
+
+    const handleEmailChange = (e) => {
+        const value = e.target.value;
+        setEmail(value);
+        if (value) {
+            validateEmail(value);
+        } else {
+            setEmailError("");
+        }
+    };
 
     const registerbutton = async () => {
+        // Step 1: Check empty fields
         if (!name || !email || !password) {
             toast.error("All fields are required");
+            return;
+        }
+
+        // Step 2: Validate name length
+        if (name.trim().length < 2) {
+            toast.error("Name must be at least 2 characters");
+            return;
+        }
+
+        // Step 3: Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            toast.error("Please enter a valid email address");
+            setEmailError("Invalid email format");
+            return;
+        }
+
+        // Step 4: Validate password length
+        if (password.length < 6) {
+            toast.error("Password must be at least 6 characters");
             return;
         }
 
         setLoading(true);
 
         try {
-            const res = await registeruser(
-                name,
-                email,
-                password
-            );
+            const res = await registeruser(name, email, password);
 
             toast.success(
-                res.data.message ||
-                    "User created successfully."
+                res.data.message || "User created successfully."
             );
 
             setTimeout(() => {
@@ -39,8 +76,7 @@ function Register() {
             }, 1500);
         } catch (err) {
             toast.error(
-                err.response?.data?.message ||
-                    "Something went wrong."
+                err.response?.data?.message || "Something went wrong."
             );
         } finally {
             setLoading(false);
@@ -53,7 +89,6 @@ function Register() {
                 <div className="mx-auto w-full max-w-md overflow-hidden rounded-[24px] bg-white shadow-[0_4px_12px_rgba(0,0,0,0.06)] sm:max-w-lg md:max-w-3xl lg:max-w-5xl">
                     <div className="grid lg:grid-cols-2">
                         {/* Left Image */}
-
                         <div className="hidden lg:block">
                             <img
                                 src="bot-image.jpg"
@@ -63,13 +98,11 @@ function Register() {
                         </div>
 
                         {/* Right Form */}
-
                         <div className="flex flex-col justify-center px-6 py-10 sm:px-8 md:px-10 lg:px-12">
                             <div className="mb-8 text-center">
                                 <h2 className="text-3xl font-semibold text-[#0B6F60]">
                                     Create Account
                                 </h2>
-
                                 <p className="mt-1 text-sm text-[#6B7280]">
                                     Create your admin account
                                 </p>
@@ -77,15 +110,12 @@ function Register() {
 
                             <div className="flex w-full flex-col items-center gap-4">
                                 {/* Name */}
-
                                 <div className="flex h-12 w-full max-w-md items-center rounded-xl border border-[#E5E7EB] px-4 transition-all duration-200 focus-within:border-[#0EA894] focus-within:ring-2 focus-within:ring-[#0EA894]/20">
                                     <input
                                         type="text"
                                         value={name}
                                         onChange={(e) =>
-                                            setName(
-                                                e.target.value
-                                            )
+                                            setName(e.target.value)
                                         }
                                         placeholder="Full name"
                                         className="w-full bg-transparent p-2 text-[#1F2937] outline-none placeholder:text-[#6B7280]"
@@ -93,51 +123,44 @@ function Register() {
                                 </div>
 
                                 {/* Email */}
-
-                                <div className="flex h-12 w-full max-w-md items-center rounded-xl border border-[#E5E7EB] px-4 transition-all duration-200 focus-within:border-[#0EA894] focus-within:ring-2 focus-within:ring-[#0EA894]/20">
-                                    <input
-                                        type="email"
-                                        value={email}
-                                        onChange={(e) =>
-                                            setEmail(
-                                                e.target.value
-                                            )
-                                        }
-                                        placeholder="admin@example.com"
-                                        className="w-full bg-transparent p-2 text-[#1F2937] outline-none placeholder:text-[#6B7280]"
-                                    />
+                                <div className="w-full max-w-md">
+                                    <div className={`flex h-12 items-center rounded-xl border px-4 transition-all duration-200 ${
+                                        emailError 
+                                            ? "border-red-500 ring-2 ring-red-500/20" 
+                                            : "border-[#E5E7EB] focus-within:border-[#0EA894] focus-within:ring-2 focus-within:ring-[#0EA894]/20"
+                                    }`}>
+                                        <input
+                                            type="email"
+                                            value={email}
+                                            onChange={handleEmailChange}
+                                            onBlur={() => email && validateEmail(email)}
+                                            placeholder="admin@example.com"
+                                            className="w-full bg-transparent p-2 text-[#1F2937] outline-none placeholder:text-[#6B7280]"
+                                        />
+                                    </div>
+                                    {emailError && (
+                                        <p className="text-red-500 text-xs mt-1 ml-1">{emailError}</p>
+                                    )}
                                 </div>
 
                                 {/* Password */}
-
                                 <div className="flex h-12 w-full max-w-md items-center rounded-xl border border-[#E5E7EB] px-2 transition-all duration-200 focus-within:border-[#0EA894] focus-within:ring-2 focus-within:ring-[#0EA894]/20">
                                     <input
-                                        type={
-                                            showPassword
-                                                ? "text"
-                                                : "password"
-                                        }
+                                        type={showPassword ? "text" : "password"}
                                         value={password}
                                         onChange={(e) =>
-                                            setPassword(
-                                                e.target.value
-                                            )
+                                            setPassword(e.target.value)
                                         }
                                         onKeyDown={(e) =>
-                                            e.key ===
-                                                "Enter" &&
-                                            registerbutton()
+                                            e.key === "Enter" && registerbutton()
                                         }
                                         placeholder="••••••••"
                                         className="flex-1 px-4 text-[#1F2937] outline-none placeholder:text-[#6B7280]"
                                     />
-
                                     <button
                                         type="button"
                                         onClick={() =>
-                                            setShowPassword(
-                                                (s) => !s
-                                            )
+                                            setShowPassword((s) => !s)
                                         }
                                         className="mr-3 text-[#6B7280] hover:text-[#374151]"
                                     >
@@ -150,11 +173,8 @@ function Register() {
                                 </div>
 
                                 {/* Button */}
-
                                 <button
-                                    onClick={
-                                        registerbutton
-                                    }
+                                    onClick={registerbutton}
                                     disabled={loading}
                                     className="mt-2 flex h-12 w-full max-w-md items-center justify-center rounded-xl bg-[#0B6F60] font-medium text-white transition hover:bg-[#0B8A79] disabled:opacity-70"
                                 >
