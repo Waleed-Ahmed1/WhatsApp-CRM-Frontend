@@ -21,6 +21,12 @@ function Login() {
             return;
         }
 
+        if (!email.includes("@") || !email.includes(".")){
+            toast.error("Please enter a valid email address")
+            return;
+        }
+
+
         setLoading(true);
 
         try {
