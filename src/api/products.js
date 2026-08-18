@@ -37,9 +37,9 @@ export const getmedia = (id) => {
 
 
 export const deletekeyword = (id, keywordIds) => {
-    return api.delete(`/products/delete-product-keywords/${id}`, {data: { keywordIds }});
+    return api.delete(`/products/delete-product-keywords/${id}`, {keywordIds });
 };
 
 export const deletemedia = (id, productMediaIds) => {
-    return api.delete(`/products/delete-product-media/${id}`, {data: { productMediaIds }});
+    return api.delete(`/products/delete-product-media/${id}`, {productMediaIds });
 };
