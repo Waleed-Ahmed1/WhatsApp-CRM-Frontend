@@ -34,3 +34,12 @@ export const uploadmedia = (id, file, category) => {
 export const getmedia = (id) => {
     return api.get(`/products/get-product-media/${id}`)
 }
+
+
+export const deletekeyword = (id, keywordIds) => {
+    return api.delete(`/products/delete-product-keywords/${id}`, {data: { keywordIds }});
+};
+
+export const deletemedia = (id, productMediaIds) => {
+    return api.delete(`/products/delete-product-media/${id}`, {data: { productMediaIds }});
+};

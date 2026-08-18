@@ -11,7 +11,7 @@ import {
     FileText,
     ExternalLink,
 } from "lucide-react";
-import { getproduct, addkeyword, uploadmedia, getmedia, getkeyword, deleteproduct } from "../api/products";
+import { getproduct, addkeyword, uploadmedia, getmedia, getkeyword, deleteproduct, deletekeyword, deletemedia } from "../api/products";
 import toast from "react-hot-toast";
 import ConfirmDialog from "../component/ConfirmDailog";
 
@@ -84,6 +84,18 @@ function ProductView() {
         }
     };
 
+    // deleting the product keywords
+    const keywordDelete = async (id, keywordIds) => {
+        try {
+            const res = await deletekeyword(id, keywordIds);
+            toast.success(res.data?.message || "Keyword deleted successfully!");
+            // Refresh keywords after deletion
+            await getKeyword(id);
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to delete keyword");
+        }
+    };
+
     const getMedia = async (id) => {
         try {
             const res = await getmedia(id);
@@ -115,6 +127,24 @@ function ProductView() {
     const toggleMediaUpload = () => {
         setShowMediaUpload((prev) => !prev);
         setSelectedFile(null);
+    };
+
+    // deleting the product media
+    const [mediadeleteid, setmediadeleteid] = useState('');
+
+    const mediadelete = async () => {
+        if (!mediadeleteid) {
+            toast.error("No media selected to delete");
+            return;
+        }
+        try {
+            const res = await deletemedia(id, mediadeleteid);
+            toast.success(res.data?.message || "Media deleted successfully!");
+            await getMedia(id);
+            setmediadeleteid('');
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to delete media");
+        }
     };
 
     // deleting the product
@@ -253,9 +283,16 @@ function ProductView() {
                             keywords.map((kw, index) => (
                                 <span
                                     key={index}
-                                    className="rounded-full bg-[#0EA894]/10 px-3 py-1.5 text-xs font-medium text-[#0B6F60]"
+                                    className="inline-flex items-center gap-1.5 rounded-full bg-[#0EA894]/10 px-3 py-1.5 text-xs font-medium text-[#0B6F60]"
                                 >
                                     {typeof kw === "string" ? kw : kw.keyword}
+                                    <button
+                                        onClick={() => keywordDelete(product.id, index)}
+                                        className="ml-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[#0B6F60] hover:bg-[#0EA894]/20 hover:text-red-500 transition-colors"
+                                        title="Remove keyword"
+                                    >
+                                        ×
+                                    </button>
                                 </span>
                             ))
                         )}
@@ -337,7 +374,7 @@ function ProductView() {
                                 return (
                                     <div
                                         key={m.id || index}
-                                        className="flex aspect-square items-center justify-center overflow-hidden rounded-xl border border-[#E5E7EB] bg-[#F9FAFB]"
+                                        className="group relative flex aspect-square items-center justify-center overflow-hidden rounded-xl border border-[#E5E7EB] bg-[#F9FAFB]"
                                     >
                                         {type.startsWith("image") ? (
                                             <img src={url} alt="Product media" className="h-full w-full object-cover" />
@@ -356,6 +393,16 @@ function ProductView() {
                                                 Open Media
                                             </a>
                                         )}
+                                        <button
+                                            onClick={() => {
+                                                setmediadeleteid(m.id);
+                                                mediadelete();
+                                            }}
+                                            className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity hover:bg-red-500 group-hover:opacity-100"
+                                            title="Delete media"
+                                        >
+                                            <X size={14} />
+                                        </button>
                                     </div>
                                 );
                             })}
