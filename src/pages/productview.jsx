@@ -140,19 +140,17 @@ function ProductView() {
     // deleting the product media
     const [mediadeleteid, setmediadeleteid] = useState('');
 
-    const mediadelete = async () => {
-        if (!mediadeleteid) {
+    const mediadelete = async (mediaIdToDelete) => {
+        if (!mediaIdToDelete) {
             toast.error("No media selected to delete");
             return;
         }
         try {
-            const res = await deletemedia(id, mediadeleteid);
+            const res = await deletemedia(id, mediaIdToDelete);
             toast.success(res.data?.message || "Media deleted successfully!");
             await getMedia(id);
-            setmediadeleteid('');
         } catch (err) {
             toast.error(err.response?.data?.message || "Failed to delete media");
-            setmediadeleteid('');
         }
     };
 
@@ -409,11 +407,8 @@ function ProductView() {
                                         )}
                                         
                                         {mediaId && (
-                                            <button
-                                                onClick={() => {
-                                                    setmediadeleteid(mediaId);
-                                                    mediadelete();
-                                                }}
+                                           <button
+                                                onClick={() => mediadelete(mediaId)}
                                                 className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity hover:bg-red-500 group-hover:opacity-100"
                                                 title="Delete media"
                                             >
