@@ -85,11 +85,19 @@ function ProductView() {
     };
 
     // deleting the product keywords
-    const keywordDelete = async (id, keywordIds) => {
+    const keywordDelete = async (id, keywordIndex) => {
         try {
-            const res = await deletekeyword(id, keywordIds);
+            // Get the keyword object and its ID
+            const keywordToDelete = keywords[keywordIndex];
+            const keywordId = keywordToDelete?.id || keywordToDelete?.keywordId;
+            
+            if (!keywordId) {
+                toast.error("Invalid keyword ID");
+                return;
+            }
+            
+            const res = await deletekeyword(id, keywordId);
             toast.success(res.data?.message || "Keyword deleted successfully!");
-            // Refresh keywords after deletion
             await getKeyword(id);
         } catch (err) {
             toast.error(err.response?.data?.message || "Failed to delete keyword");
@@ -281,21 +289,24 @@ function ProductView() {
                         {keywords.length === 0 ? (
                             <p className="text-sm text-[#9CA3AF]">No keywords added yet.</p>
                         ) : (
-                            keywords.map((kw, index) => (
-                                <span
-                                    key={index}
-                                    className="inline-flex items-center gap-1.5 rounded-full bg-[#0EA894]/10 px-3 py-1.5 text-xs font-medium text-[#0B6F60]"
-                                >
-                                    {typeof kw === "string" ? kw : kw.keyword}
-                                    <button
-                                        onClick={() => keywordDelete(product.id, index)}
-                                        className="ml-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[#0B6F60] hover:bg-[#0EA894]/20 hover:text-red-500 transition-colors"
-                                        title="Remove keyword"
+                            keywords.map((kw, index) => {
+                                const keywordText = typeof kw === "string" ? kw : kw.keyword;
+                                return (
+                                    <span
+                                        key={index}
+                                        className="inline-flex items-center gap-1.5 rounded-full bg-[#0EA894]/10 px-3 py-1.5 text-xs font-medium text-[#0B6F60]"
                                     >
-                                        ×
-                                    </button>
-                                </span>
-                            ))
+                                        {keywordText}
+                                        <button
+                                            onClick={() => keywordDelete(product.id, index)}
+                                            className="ml-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[#0B6F60] hover:bg-[#0EA894]/20 hover:text-red-500 transition-colors"
+                                            title="Remove keyword"
+                                        >
+                                            ×
+                                        </button>
+                                    </span>
+                                );
+                            })
                         )}
                     </div>
                 </div>

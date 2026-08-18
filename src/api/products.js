@@ -17,7 +17,7 @@ export const getproduct = (id) => {
 };
 
 export const addkeyword = (id, keywords) => {
-    // Convert to array if it's a string
+    // Must send as array
     const keywordArray = Array.isArray(keywords) ? keywords : [keywords];
     return api.post(`/products/add-keywords/${id}`, { keywords: keywordArray });
 };
@@ -28,7 +28,7 @@ export const getkeyword = (id) => {
 
 export const uploadmedia = (id, file, category) => {
     const formData = new FormData();
-    formData.append("category", category);
+    formData.append("category", category || '');
     formData.append("media", file);
     return api.post(`/products/${id}/media`, formData);
 };
@@ -38,13 +38,17 @@ export const getmedia = (id) => {
 };
 
 export const deletekeyword = (id, keywordIds) => {
-    return api.delete(`/products/delete-product-keywords/${id}`, {
-        data: { keywordIds }
+    // Must send as array
+    const idsArray = Array.isArray(keywordIds) ? keywordIds : [keywordIds];
+    return api.delete(`/products/delete-product-keywords/${id}`, { 
+        data: { keywordIds: idsArray } 
     });
 };
 
 export const deletemedia = (id, productMediaIds) => {
-    return api.delete(`/products/delete-product-media/${id}`, {
-        data: { productMediaIds }
+    // Must send as array
+    const idsArray = Array.isArray(productMediaIds) ? productMediaIds : [productMediaIds];
+    return api.delete(`/products/delete-product-media/${id}`, { 
+        data: { productMediaIds: idsArray } 
     });
 };
