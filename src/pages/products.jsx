@@ -216,7 +216,7 @@ function Products() {
 
                             <div className="mt-3 flex items-center justify-between border-t border-[#F3F4F6] pt-3">
                                 <span className="text-base font-semibold text-[#0B6F60]">
-                                    ${p.price}
+                                    {p.price} PKR
                                 </span>
                                 <button
                                     onClick={() => navigate(`/dashboard/products/${p.id}`)}
