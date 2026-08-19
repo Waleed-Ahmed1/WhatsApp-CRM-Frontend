@@ -11,7 +11,7 @@ function ForgotPassword() {
     // ===== STEP 1: Email =====
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
-    const [step, setStep] = useState(1); // 1: Email, 2: OTP + Password
+    const [step, setStep] = useState(1);
 
     // ===== STEP 2: OTP + Password =====
     const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -56,23 +56,59 @@ function ForgotPassword() {
         try {
             const res = await forgotPassword(email);
             
-            if (res.data.success) {
+            // ✅ FIX: Handle both success cases
+            // Case 1: User exists -> success: true
+            // Case 2: User doesn't exist -> success: false but message says "OTP has been sent"
+            // Both cases mean we should proceed to OTP step
+            if (res.data.success === true || 
+                res.data.message?.toLowerCase().includes("otp has been sent")) {
+                
                 setStep(2);
                 setTimer(60);
                 setCanResend(false);
-                toast.success("OTP sent to your email!");
+                
+                // Show appropriate message
+                if (res.data.success === true) {
+                    toast.success("OTP sent to your email!");
+                } else {
+                    // This is the security measure - always show success
+                    toast.success("If this email exists, an OTP has been sent!");
+                }
                 
                 setTimeout(() => {
                     if (inputRefs.current[0]) {
                         inputRefs.current[0].focus();
                     }
                 }, 100);
+            } else {
+                // Only show error if both success is false AND message doesn't contain OTP message
+                toast.error(res.data.message || "Failed to send OTP");
             }
         } catch (err) {
-            toast.error(
-                err.response?.data?.message || 
-                "Email not found. Please check your email address."
-            );
+            // Handle network errors
+            if (err.response) {
+                const status = err.response.status;
+                const message = err.response.data?.message;
+                
+                if (status === 404) {
+                    // For security, still show success message
+                    toast.success("If this email exists, an OTP has been sent!");
+                    setStep(2);
+                    setTimer(60);
+                    setCanResend(false);
+                    setTimeout(() => {
+                        if (inputRefs.current[0]) {
+                            inputRefs.current[0].focus();
+                        }
+                    }, 100);
+                } else {
+                    toast.error(message || "Failed to send OTP. Please try again.");
+                }
+            } else if (err.request) {
+                toast.error("Network error. Please check your connection.");
+            } else {
+                toast.error("Failed to send OTP. Please try again.");
+            }
         } finally {
             setLoading(false);
         }
@@ -84,10 +120,17 @@ function ForgotPassword() {
         setTimer(60);
         
         try {
-            await forgotPassword(email);
-            toast.success("New OTP sent to your email!");
+            const res = await forgotPassword(email);
+            
+            // ✅ Same handling as above for resend
+            if (res.data.success === true || 
+                res.data.message?.toLowerCase().includes("otp has been sent")) {
+                toast.success("New OTP sent to your email!");
+            } else {
+                toast.success("If this email exists, a new OTP has been sent!");
+            }
         } catch (err) {
-            toast.error("Failed to resend OTP. Please try again.");
+            toast.success("If this email exists, a new OTP has been sent!");
             setCanResend(true);
         }
     };
@@ -164,6 +207,8 @@ function ForgotPassword() {
                 setTimeout(() => {
                     navigate("/login", { replace: true });
                 }, 3000);
+            } else {
+                toast.error(res.data.message || "Failed to reset password");
             }
         } catch (err) {
             toast.error(
