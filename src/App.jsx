@@ -17,6 +17,7 @@ import Contacts from "./pages/contacts.jsx";
 import Groups from "./pages/groups.jsx";
 import ProtectedRoute from "./component/ProtectedRoute.jsx";
 import Broadcast from "./pages/broadcast.jsx";
+import ForgotPassword from "./pages/forgotpassword.jsx";
 
 function App() {
     return (
@@ -76,6 +77,7 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/logout" element={<Logout />} />
+                <Route path="/forgot_password" element={<ForgotPassword />} />
 
                 <Route element={<ProtectedRoute />}>
                     <Route path="/dashboard" element={<DashboardLayout />}>

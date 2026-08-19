@@ -119,10 +119,16 @@ function Login() {
                                 >
                                     {loading ? "Signing in..." : "Sign In"}
                                 </button>
+                                 <Link
+                                        to="/forgot_password"
+                                        className="text-sm text-[#0EA894] hover:text-[#0B8A79] transition-colors"
+                                    >
+                                        Forgot Password
+                                    </Link>
 
                             </div>
 
-                            <div className="mt-6 text-center">
+                            <div className="mt-4 text-center">
                                 <p className="text-sm text-[#6B7280]">
                                     Don't have an account?{" "}
                                     <Link
