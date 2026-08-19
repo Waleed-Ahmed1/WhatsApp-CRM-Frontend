@@ -30,7 +30,7 @@ function Categories() {
         setsaving(true);
         try {
             const res = await addcategory(newcategoryname);
-            toast.success(res.data.message || "Category added successfully");
+            toast.success(res.data.message || "Category added Successfully");
             setnewcategoryname("");
             getCategories();
         } catch (err) {
@@ -63,7 +63,7 @@ function Categories() {
         try {
             await deletecategory(cat);
             setgcategory((prev) => prev.filter((c) => c.name !== cat));
-            toast.success("Category deleted");
+            toast.success('Category deleted', { style: { minWidth: '200px', padding: '18px 28px', fontSize: '16px', background: '#0B6F60', color: '#FFFFFF',borderRadius: '12px'},duration: 4000,})
         } catch (err) {
             toast.error(err.response?.data?.message || "Something went wrong");
         }

@@ -9,7 +9,7 @@ function Logout(){
     const logoutbutton = async ()=>{
         try {
             const res = await logoutuser()
-            localStorage.removeItem("token");
+            localStorage.removeItem("accessToken");
             toast.success(res.data.message || "Logged out successfully")
             navigate('/login')
         } catch(err){
