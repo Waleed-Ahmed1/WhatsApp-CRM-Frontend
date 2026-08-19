@@ -10,24 +10,34 @@ export default function DashboardLayout() {
   const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const local_store = JSON.parse(localStorage.getItem("user"));
+  let local_store = null;
+  try {
+    local_store = JSON.parse(localStorage.getItem("user"));
+  } catch {
+    local_store = null;
+  }
   const user_name = local_store?.name || "unknown";
   const email_user = local_store?.email || "unknown@gmail.com";
 
   const logout = async () => {
     try {
       const res = await logoutuser();
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
       toast.success(res.data.message || "Logged out Successfully.");
-      navigate("/login");
     } catch (err) {
+      // Server-side logout may fail (e.g. the refresh-token cookie not being
+      // sent cross-site — see BUG-AUTH-005). Either way, don't trap the user
+      // on the dashboard: the finally block below always clears local state.
       console.error(err);
       toast.error(
         err.response?.data?.message || "Logout Failed! Try Again later.",
       );
+    } finally {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
+      navigate("/login", { replace: true });
     }
   };
+
   useEffect(() => {
     const checkStatus = async () => {
       try {
