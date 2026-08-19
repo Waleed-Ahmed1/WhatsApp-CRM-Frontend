@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { Eye, EyeOff, Mail, Shield, CheckCircle, ArrowLeft } from "lucide-react";
-import { forgotPassword, resetPassword } from "../api/auth";
+import { forgotPassword, resetPassword } from "../api/forgotpassword";
 
 function ForgotPassword() {
     const navigate = useNavigate();
