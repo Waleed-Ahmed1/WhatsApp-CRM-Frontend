@@ -34,16 +34,18 @@ function Login() {
             const res = await loginuser(email, password);
 
             if (res.data.accessToken) {
+                const { password, ...safeUser } = res.data.user;
+
                 dispatch(
                     loginSuccess({
-                        user: res.data.user,
+                        user: safeUser,
                         accessToken: res.data.accessToken,
                     })
                 );
 
-                localStorage.setItem("token", res.data.accessToken);
-                localStorage.setItem("user", JSON.stringify(res.data.user));
-                toast.success(`Welcome ${res.data.user.name}`)
+                localStorage.setItem("accessToken", res.data.accessToken);
+                localStorage.setItem("user", JSON.stringify(safeUser));
+                toast.success(`Welcome ${safeUser.name}`)
                 navigate("/dashboard/chat", { replace: true });
             }
         } catch (err) {
