@@ -63,7 +63,7 @@ function Categories() {
         try {
             await deletecategory(cat);
             setgcategory((prev) => prev.filter((c) => c.name !== cat));
-            toast.success('Category deleted', { style: { minWidth: '100px', padding: '18px 28px', fontSize: '16px', background: '#0B6F60', color: '#FFFFFF',borderRadius: '12px'},duration: 30000,})
+            toast.success('Category deleted')
         } catch (err) {
             toast.error(err.response?.data?.message || "Something went wrong");
         }
