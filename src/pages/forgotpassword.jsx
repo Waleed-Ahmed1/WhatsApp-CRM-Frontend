@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { Eye, EyeOff, Mail, Shield, CheckCircle, ArrowLeft } from "lucide-react";
-import { forgotPassword, resetPassword } from "../api/auth"; // your existing API
+import { forgotPassword, resetPassword } from "../api/auth";
 
 function ForgotPassword() {
     const navigate = useNavigate();
@@ -53,9 +53,11 @@ function ForgotPassword() {
         setLoading(true);
         try {
             const res = await forgotPassword(email);
-            // Always treat status 200 as success (even if success: false for security)
-            if (res.status === 200) {
-                toast.success("If this email exists, an OTP has been sent!");
+            
+            // ✅ Check success flag from backend
+            if (res.data.success === true) {
+                // Email exists - OTP sent successfully
+                toast.success("OTP sent to your email!");
                 setStep(2);
                 setTimer(60);
                 setCanResend(false);
@@ -63,9 +65,11 @@ function ForgotPassword() {
                     if (inputRefs.current[0]) inputRefs.current[0].focus();
                 }, 100);
             } else {
-                toast.error(res.data?.message || "Failed to send OTP");
+                // Email doesn't exist - show error
+                toast.error(res.data.message || "Email not found. Please check your email address.");
             }
         } catch (error) {
+            // Network or server error
             toast.error(
                 error.response?.data?.message ||
                 "Failed to send OTP. Please check your connection."
@@ -80,10 +84,15 @@ function ForgotPassword() {
         setCanResend(false);
         setTimer(60);
         try {
-            await forgotPassword(email);
-            toast.success("If this email exists, a new OTP has been sent!");
+            const res = await forgotPassword(email);
+            if (res.data.success === true) {
+                toast.success("New OTP sent to your email!");
+            } else {
+                toast.error("Email not found. Please try again.");
+                setCanResend(true);
+            }
         } catch {
-            toast.success("If this email exists, a new OTP has been sent!");
+            toast.error("Failed to resend OTP. Please try again.");
             setCanResend(true);
         }
     };
