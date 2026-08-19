@@ -4,6 +4,13 @@ import { toast } from "react-hot-toast";
 import { Eye, EyeOff, Mail, Shield, CheckCircle, ArrowLeft } from "lucide-react";
 import { forgotPassword, resetPassword } from "../api/forgotpassword";
 
+const MAX_OTP_ATTEMPTS = 5;
+
+// Prefer the server's own message, fall back to a generic one if it's missing
+// (network error, timeout, unexpected response shape, etc.)
+const getServerMessage = (error, fallback) =>
+    error?.response?.data?.message || fallback;
+
 function ForgotPassword() {
     const navigate = useNavigate();
     const inputRefs = useRef([]);
@@ -22,6 +29,8 @@ function ForgotPassword() {
     const [timer, setTimer] = useState(60);
     const [canResend, setCanResend] = useState(false);
     const [verifying, setVerifying] = useState(false);
+    const [resending, setResending] = useState(false);
+    const [failedAttempts, setFailedAttempts] = useState(0);
 
     // Success
     const [isResetSuccessful, setIsResetSuccessful] = useState(false);
@@ -38,41 +47,59 @@ function ForgotPassword() {
         }
     }, [step, timer]);
 
+    // ===== Helpers =====
+    const clearOtp = (focusFirst = true) => {
+        setOtp(["", "", "", "", "", ""]);
+        if (focusFirst) {
+            setTimeout(() => {
+                if (inputRefs.current[0]) inputRefs.current[0].focus();
+            }, 100);
+        }
+    };
+
+    const resetToStep1 = () => {
+        setStep(1);
+        setOtp(["", "", "", "", "", ""]);
+        setNewPassword("");
+        setConfirmPassword("");
+        setFailedAttempts(0);
+    };
+
     // ===== Send OTP =====
     const handleSendOtp = async () => {
-        if (!email) {
+        const trimmedEmail = email.trim();
+
+        if (!trimmedEmail) {
             toast.error("Email is required");
             return;
         }
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
+        if (!emailRegex.test(trimmedEmail)) {
             toast.error("Please enter a valid email address");
             return;
         }
 
         setLoading(true);
         try {
-            const res = await forgotPassword(email);
-            
-            // ✅ Check success flag from backend
-            if (res.data.success === true) {
-                // Email exists - OTP sent successfully
-                toast.success("OTP sent to your email!");
-                setStep(2);
-                setTimer(60);
-                setCanResend(false);
-                setTimeout(() => {
-                    if (inputRefs.current[0]) inputRefs.current[0].focus();
-                }, 100);
-            } else {
-                // Email doesn't exist - show error
-                toast.error(res.data.message || "Email not found. Please check your email address.");
-            }
+            await forgotPassword(trimmedEmail);
+
+            // IMPORTANT: the backend intentionally returns HTTP 200 whether or not
+            // the email is registered, so that a client can't tell accounts apart.
+            // We deliberately do NOT branch on res.data.success here — doing so
+            // would leak account existence through the UI (step 2 vs. staying on
+            // step 1), even though the status code itself doesn't leak it.
+            // A genuine server-side failure (e.g. mail service down) comes back
+            // as a non-200 response and is handled in the catch block below.
+            toast.success("If an account exists for this email, an OTP has been sent.");
+            setEmail(trimmedEmail);
+            setStep(2);
+            setTimer(60);
+            setCanResend(false);
+            setFailedAttempts(0);
+            clearOtp();
         } catch (error) {
-            // Network or server error
             toast.error(
-                error.response?.data?.message ||
-                "Failed to send OTP. Please check your connection."
+                getServerMessage(error, "Failed to send OTP. Please check your connection.")
             );
         } finally {
             setLoading(false);
@@ -81,19 +108,20 @@ function ForgotPassword() {
 
     // ===== Resend OTP =====
     const handleResendOtp = async () => {
+        if (resending) return; // guard against double-clicks before state updates
+        setResending(true);
         setCanResend(false);
-        setTimer(60);
         try {
-            const res = await forgotPassword(email);
-            if (res.data.success === true) {
-                toast.success("New OTP sent to your email!");
-            } else {
-                toast.error("Email not found. Please try again.");
-                setCanResend(true);
-            }
-        } catch {
-            toast.error("Failed to resend OTP. Please try again.");
-            setCanResend(true);
+            await forgotPassword(email);
+            // Same reasoning as handleSendOtp: don't branch on success flag.
+            toast.success("If an account exists for this email, a new OTP has been sent.");
+            setTimer(60);
+            clearOtp(); // invalidate any stale digits from the previous OTP
+        } catch (error) {
+            toast.error(getServerMessage(error, "Failed to resend OTP. Please try again."));
+            setCanResend(true); // let them retry
+        } finally {
+            setResending(false);
         }
     };
 
@@ -131,6 +159,12 @@ function ForgotPassword() {
 
     // ===== Reset Password =====
     const handleResetPassword = async () => {
+        if (failedAttempts >= MAX_OTP_ATTEMPTS) {
+            toast.error("Too many failed attempts. Please request a new OTP.");
+            resetToStep1();
+            return;
+        }
+
         const otpString = otp.join("");
         if (otpString.length !== 6) {
             toast.error("Please enter complete 6-digit OTP");
@@ -154,19 +188,33 @@ function ForgotPassword() {
             const res = await resetPassword(email, newPassword, otpString);
             if (res.data.success) {
                 setIsResetSuccessful(true);
-                toast.success("Password reset successfully!");
+                toast.success(res.data.message || "Password reset successfully!");
+                // Clear sensitive fields from memory now that we're done with them
+                setNewPassword("");
+                setConfirmPassword("");
+                setOtp(["", "", "", "", "", ""]);
                 setTimeout(() => navigate("/login", { replace: true }), 3000);
             } else {
-                toast.error(res.data.message || "Reset failed");
+                registerFailedAttempt(res.data.message);
             }
         } catch (error) {
-            toast.error(
-                error.response?.data?.message ||
-                "Reset failed. Please check your OTP and try again."
-            );
+            registerFailedAttempt(getServerMessage(error, "Reset failed. Please check your OTP and try again."));
         } finally {
             setVerifying(false);
         }
+    };
+
+    const registerFailedAttempt = (message) => {
+        const attemptsUsed = failedAttempts + 1;
+        setFailedAttempts(attemptsUsed);
+
+        if (attemptsUsed >= MAX_OTP_ATTEMPTS) {
+            toast.error("Too many failed attempts. Please request a new OTP.");
+            resetToStep1();
+            return;
+        }
+
+        toast.error(message || "Reset failed");
     };
 
     // ===== Success View =====
@@ -231,6 +279,7 @@ function ForgotPassword() {
                                         onChange={(e) => setEmail(e.target.value)}
                                         onKeyDown={(e) => e.key === "Enter" && handleSendOtp()}
                                         placeholder="admin@example.com"
+                                        autoComplete="email"
                                         className="w-full bg-transparent outline-none text-[#1F2937] placeholder:text-[#abafb7]"
                                         disabled={loading}
                                         autoFocus
@@ -276,12 +325,7 @@ function ForgotPassword() {
             <div className="w-full max-w-md overflow-hidden rounded-[24px] bg-white shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
                 <div className="p-6 sm:p-8 md:p-10">
                     <button
-                        onClick={() => {
-                            setStep(1);
-                            setOtp(["", "", "", "", "", ""]);
-                            setNewPassword("");
-                            setConfirmPassword("");
-                        }}
+                        onClick={resetToStep1}
                         className="mb-6 inline-flex items-center gap-2 text-sm text-[#6B7280] transition hover:text-[#0B6F60]"
                     >
                         <ArrowLeft size={18} /> Back
@@ -317,18 +361,24 @@ function ForgotPassword() {
                                         onChange={(e) => handleOtpChange(index, e.target.value)}
                                         onKeyDown={(e) => handleOtpKeyDown(index, e)}
                                         onPaste={handleOtpPaste}
+                                        autoComplete="one-time-code"
                                         className="h-12 w-12 rounded-xl border border-[#E5E7EB] text-center text-xl font-semibold text-[#1F2937] outline-none transition-all focus:border-[#0EA894] focus:ring-2 focus:ring-[#0EA894]/20 sm:h-14 sm:w-14"
                                     />
                                 ))}
                             </div>
                             <div className="mt-2 flex justify-between items-center">
-                                <p className="text-xs text-[#6B7280]">Enter 6-digit code</p>
+                                <p className="text-xs text-[#6B7280]">
+                                    {failedAttempts > 0
+                                        ? `${MAX_OTP_ATTEMPTS - failedAttempts} attempt(s) remaining`
+                                        : "Enter 6-digit code"}
+                                </p>
                                 {canResend ? (
                                     <button
                                         onClick={handleResendOtp}
-                                        className="text-xs font-medium text-[#0EA894] hover:text-[#0B8A79] transition-colors"
+                                        disabled={resending}
+                                        className="text-xs font-medium text-[#0EA894] hover:text-[#0B8A79] transition-colors disabled:opacity-60"
                                     >
-                                        Resend OTP
+                                        {resending ? "Sending..." : "Resend OTP"}
                                     </button>
                                 ) : (
                                     <p className="text-xs text-[#6B7280]">
@@ -349,6 +399,7 @@ function ForgotPassword() {
                                     value={newPassword}
                                     onChange={(e) => setNewPassword(e.target.value)}
                                     placeholder="••••••••"
+                                    autoComplete="new-password"
                                     className="flex-1 px-4 bg-transparent outline-none text-[#1F2937] placeholder:text-[#abafb7]"
                                 />
                                 <button
@@ -374,6 +425,7 @@ function ForgotPassword() {
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                     onKeyDown={(e) => e.key === "Enter" && handleResetPassword()}
                                     placeholder="••••••••"
+                                    autoComplete="new-password"
                                     className="flex-1 px-4 bg-transparent outline-none text-[#1F2937] placeholder:text-[#abafb7]"
                                 />
                                 <button
@@ -404,12 +456,7 @@ function ForgotPassword() {
                         </button>
 
                         <button
-                            onClick={() => {
-                                setStep(1);
-                                setOtp(["", "", "", "", "", ""]);
-                                setNewPassword("");
-                                setConfirmPassword("");
-                            }}
+                            onClick={resetToStep1}
                             className="text-sm text-[#6B7280] hover:text-[#0B6F60] transition-colors"
                         >
                             ← Change email address
