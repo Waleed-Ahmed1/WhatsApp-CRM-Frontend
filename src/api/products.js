@@ -54,5 +54,5 @@ export const deletemedia = (id, productMediaIds) => {
 };
 
 export const updateDescription = (id,value) =>{
-    return api.patch(`/products/update-product-description/${id}`,{value})
+    return api.patch(`/products/update-product-description/${id}`,{productDescription: value?.trim()})
 }
