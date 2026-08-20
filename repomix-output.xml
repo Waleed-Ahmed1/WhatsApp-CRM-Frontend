@@ -3358,12 +3358,6 @@ function ForgotPassword() {
                             ) : "Reset Password"}
                         </button>
 
-                        <button
-                            onClick={resetToStep1}
-                            className="text-sm text-[#6B7280] hover:text-[#0B6F60] transition-colors"
-                        >
-                            ← Change email address
-                        </button>
 
                         <div className="mt-2 text-center">
                             <p className="text-sm text-[#6B7280]">

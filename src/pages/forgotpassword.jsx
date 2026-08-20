@@ -82,12 +82,8 @@ function ForgotPassword() {
         try {
             const res = await forgotPassword(trimmedEmail);
             
-            // ✅ The backend ALWAYS returns 200 with success:true/false
-            // We ALWAYS show the same message (security best practice)
-            toast.success("If an account exists for this email, an OTP has been sent.");
+            toast.success(res.data?.message || "OTP has been sent to you email");
             
-            // ✅ CRITICAL: We ALWAYS move to step 2 (security best practice)
-            // This prevents email enumeration
             setEmail(trimmedEmail);
             setStep(2);
             setTimer(60);
@@ -96,7 +92,6 @@ function ForgotPassword() {
             clearOtp();
             
         } catch (error) {
-            // Only show error for network/connection issues
             toast.error(
                 getServerMessage(error, "Failed to send OTP. Please check your connection.")
             );
@@ -111,9 +106,8 @@ function ForgotPassword() {
         setResending(true);
         setCanResend(false);
         try {
-            await forgotPassword(email);
-            // ✅ Always show same message (security best practice)
-            toast.success("If an account exists for this email, a new OTP has been sent.");
+            const res = await forgotPassword(email);  // ✅ FIXED: Added 'const res ='
+            toast.success(res.data?.message || "OTP has been sent to you email");
             setTimer(60);
             clearOtp();
         } catch (error) {
@@ -186,7 +180,6 @@ function ForgotPassword() {
         try {
             const res = await resetPassword(email, newPassword, otpString);
             
-            // ✅ Check if OTP is valid
             if (res.data.success) {
                 setIsResetSuccessful(true);
                 toast.success(res.data.message || "Password reset successfully!");
@@ -195,11 +188,9 @@ function ForgotPassword() {
                 setOtp(["", "", "", "", "", ""]);
                 setTimeout(() => navigate("/login", { replace: true }), 3000);
             } else {
-                // ✅ OTP invalid or expired
                 registerFailedAttempt(res.data.message || "Invalid OTP. Please try again.");
             }
         } catch (error) {
-            // ✅ Handle 400/500 errors
             const errorMsg = error.response?.data?.message || "Reset failed. Please check your OTP and try again.";
             registerFailedAttempt(errorMsg);
         } finally {
@@ -327,7 +318,6 @@ function ForgotPassword() {
         <div className="flex min-h-screen bg-[#EAF7F4] items-center justify-center px-4">
             <div className="w-full max-w-md overflow-hidden rounded-[24px] bg-white shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
                 <div className="p-6 sm:p-8 md:p-10">
-                    {/* ✅ REMOVED the "Back" button to prevent changing email */}
                     <div className="mb-8 text-center">
                         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#EAF7F4]">
                             <Shield className="h-6 w-6 text-[#0B6F60]" />
@@ -452,8 +442,6 @@ function ForgotPassword() {
                                 </>
                             ) : "Reset Password"}
                         </button>
-
-                        {/* ✅ REMOVED "Change email address" button */}
 
                         <div className="mt-2 text-center">
                             <p className="text-sm text-[#6B7280]">
