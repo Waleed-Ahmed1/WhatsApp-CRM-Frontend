@@ -53,6 +53,6 @@ export const deletemedia = (id, productMediaIds) => {
     });
 };
 
-export const updateDescription = (id,description) =>{
-    return api.patch(`/products/update-product-description/${id}`,{description})
+export const updateDescription = (id,value) =>{
+    return api.patch(`/products/update-product-description/${id}`,{value})
 }
