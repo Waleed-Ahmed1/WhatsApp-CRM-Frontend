@@ -10,8 +10,10 @@ import {
     Upload,
     FileText,
     ExternalLink,
+    PencilIcon, 
+    CheckIcon, 
 } from "lucide-react";
-import { getproduct, addkeyword, uploadmedia, getmedia, getkeyword, deleteproduct, deletekeyword, deletemedia } from "../api/products";
+import { getproduct, addkeyword, uploadmedia, getmedia, getkeyword, deleteproduct, deletekeyword, deletemedia,updateDescription } from "../api/products";
 import toast from "react-hot-toast";
 import ConfirmDialog from "../component/ConfirmDailog";
 
@@ -62,6 +64,27 @@ function ProductView() {
         setNewKeyword("");
     };
 
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedDescription, setEditedDescription] = useState("");
+
+    const updatedescription = async (id, value) => {
+        try {
+            setIsUpdating(true);
+            const res = await updateDescription(id, value);
+            toast.success(res.data?.message || "Description updated successfully!");
+            
+            // Update local product state
+            setProduct(prev => ({ ...prev, description: value }));
+            setIsEditing(false); // Close edit mode
+            
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to Update Description");
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+    
     const addKeyword = async (productId) => {
         if (!newKeyword.trim()) {
             toast.error("Please enter a keyword");
@@ -239,10 +262,78 @@ function ProductView() {
                         <span className="text-xl font-semibold text-[#0B6F60]">{product.price} PKR</span>
                     </div>
 
-                    <div className="border-t border-[#F3F4F6] pt-4">
+                    {/* <div className="border-t border-[#F3F4F6] pt-4">
                         <p className="mb-1 text-xs font-medium uppercase tracking-wide text-[#9CA3AF]">Description</p>
-                        <p className="text-sm leading-relaxed text-[#374151]">{product.description}</p>
+                        <p className="text-sm leading-relaxed text-[#374151]">{product.description}  </p>
+                    </div> */}
+                    {/* Description */}
+                    <div className="border-t border-[#F3F4F6] pt-4">
+                        <div className="flex items-center justify-between mb-1">
+                            <p className="text-xs font-medium uppercase tracking-wide text-[#9CA3AF]">
+                                Description
+                            </p>
+                            {!isEditing && (
+                                <button
+                                    onClick={() => {
+                                        setEditedDescription(product.description);
+                                        setIsEditing(true);
+                                    }}
+                                    className="p-1 text-[#9CA3AF] hover:text-[#0EA894] transition-colors rounded-md hover:bg-[#F3F4F6]"
+                                    title="Edit description"
+                                >
+                                    <PencilIcon size={14} />
+                                </button>
+                            )}
+                        </div>
+
+                        {isEditing ? (
+                            <div className="space-y-2">
+                                <textarea
+                                    value={editedDescription}
+                                    onChange={(e) => setEditedDescription(e.target.value)}
+                                    className="w-full p-2 text-sm border border-[#E5E7EB] rounded-lg focus:ring-2 focus:ring-[#0EA894] focus:border-transparent resize-none bg-[#F9FAFB]"
+                                    rows={3}
+                                    placeholder="Enter product description..."
+                                    disabled={isUpdating}
+                                    autoFocus
+                                />
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => updatedescription(product.id, editedDescription)}
+                                        disabled={isUpdating}
+                                        className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-[#0B6F60] rounded-lg hover:bg-[#0B8A79] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        {isUpdating ? (
+                                            <>
+                                                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                                </svg>
+                                                Saving...
+                                            </>
+                                        ) : (
+                                            "Save"
+                                        )}
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setIsEditing(false);
+                                            setEditedDescription(product.description);
+                                        }}
+                                        disabled={isUpdating}
+                                        className="px-3 py-1.5 text-sm font-medium text-[#6B7280] bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-50 transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <p className="text-sm leading-relaxed text-[#374151]">
+                                {product.description || "No description provided"}
+                            </p>
+                        )}
                     </div>
+                    
                 </div>
 
                 {/* Keywords */}

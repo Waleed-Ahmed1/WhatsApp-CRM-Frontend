@@ -52,3 +52,7 @@ export const deletemedia = (id, productMediaIds) => {
         data: { productMediaIds: idsArray } 
     });
 };
+
+export const updateDescription = (id,description) =>{
+    return api.patch(`/products/update-product-description/${id}`,{description})
+}
