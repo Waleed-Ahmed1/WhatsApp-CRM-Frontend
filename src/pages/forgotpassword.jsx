@@ -7,7 +7,6 @@ import { forgotPassword, resetPassword } from "../api/forgotpassword";
 const MAX_OTP_ATTEMPTS = 5;
 
 // Prefer the server's own message, fall back to a generic one if it's missing
-// (network error, timeout, unexpected response shape, etc.)
 const getServerMessage = (error, fallback) =>
     error?.response?.data?.message || fallback;
 
@@ -81,23 +80,23 @@ function ForgotPassword() {
 
         setLoading(true);
         try {
-            await forgotPassword(trimmedEmail);
-
-            // IMPORTANT: the backend intentionally returns HTTP 200 whether or not
-            // the email is registered, so that a client can't tell accounts apart.
-            // We deliberately do NOT branch on res.data.success here — doing so
-            // would leak account existence through the UI (step 2 vs. staying on
-            // step 1), even though the status code itself doesn't leak it.
-            // A genuine server-side failure (e.g. mail service down) comes back
-            // as a non-200 response and is handled in the catch block below.
+            const res = await forgotPassword(trimmedEmail);
+            
+            // ✅ The backend ALWAYS returns 200 with success:true/false
+            // We ALWAYS show the same message (security best practice)
             toast.success("If an account exists for this email, an OTP has been sent.");
+            
+            // ✅ CRITICAL: We ALWAYS move to step 2 (security best practice)
+            // This prevents email enumeration
             setEmail(trimmedEmail);
             setStep(2);
             setTimer(60);
             setCanResend(false);
             setFailedAttempts(0);
             clearOtp();
+            
         } catch (error) {
+            // Only show error for network/connection issues
             toast.error(
                 getServerMessage(error, "Failed to send OTP. Please check your connection.")
             );
@@ -108,18 +107,18 @@ function ForgotPassword() {
 
     // ===== Resend OTP =====
     const handleResendOtp = async () => {
-        if (resending) return; // guard against double-clicks before state updates
+        if (resending) return;
         setResending(true);
         setCanResend(false);
         try {
             await forgotPassword(email);
-            // Same reasoning as handleSendOtp: don't branch on success flag.
+            // ✅ Always show same message (security best practice)
             toast.success("If an account exists for this email, a new OTP has been sent.");
             setTimer(60);
-            clearOtp(); // invalidate any stale digits from the previous OTP
+            clearOtp();
         } catch (error) {
             toast.error(getServerMessage(error, "Failed to resend OTP. Please try again."));
-            setCanResend(true); // let them retry
+            setCanResend(true);
         } finally {
             setResending(false);
         }
@@ -186,19 +185,23 @@ function ForgotPassword() {
         setVerifying(true);
         try {
             const res = await resetPassword(email, newPassword, otpString);
+            
+            // ✅ Check if OTP is valid
             if (res.data.success) {
                 setIsResetSuccessful(true);
                 toast.success(res.data.message || "Password reset successfully!");
-                // Clear sensitive fields from memory now that we're done with them
                 setNewPassword("");
                 setConfirmPassword("");
                 setOtp(["", "", "", "", "", ""]);
                 setTimeout(() => navigate("/login", { replace: true }), 3000);
             } else {
-                registerFailedAttempt(res.data.message);
+                // ✅ OTP invalid or expired
+                registerFailedAttempt(res.data.message || "Invalid OTP. Please try again.");
             }
         } catch (error) {
-            registerFailedAttempt(getServerMessage(error, "Reset failed. Please check your OTP and try again."));
+            // ✅ Handle 400/500 errors
+            const errorMsg = error.response?.data?.message || "Reset failed. Please check your OTP and try again.";
+            registerFailedAttempt(errorMsg);
         } finally {
             setVerifying(false);
         }
@@ -324,12 +327,7 @@ function ForgotPassword() {
         <div className="flex min-h-screen bg-[#EAF7F4] items-center justify-center px-4">
             <div className="w-full max-w-md overflow-hidden rounded-[24px] bg-white shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
                 <div className="p-6 sm:p-8 md:p-10">
-                    <button
-                        onClick={resetToStep1}
-                        className="mb-6 inline-flex items-center gap-2 text-sm text-[#6B7280] transition hover:text-[#0B6F60]"
-                    >
-                        <ArrowLeft size={18} /> Back
-                    </button>
+                    {/* ✅ REMOVED the "Back" button to prevent changing email */}
                     <div className="mb-8 text-center">
                         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#EAF7F4]">
                             <Shield className="h-6 w-6 text-[#0B6F60]" />
@@ -455,12 +453,7 @@ function ForgotPassword() {
                             ) : "Reset Password"}
                         </button>
 
-                        <button
-                            onClick={resetToStep1}
-                            className="text-sm text-[#6B7280] hover:text-[#0B6F60] transition-colors"
-                        >
-                            ← Change email address
-                        </button>
+                        {/* ✅ REMOVED "Change email address" button */}
 
                         <div className="mt-2 text-center">
                             <p className="text-sm text-[#6B7280]">
