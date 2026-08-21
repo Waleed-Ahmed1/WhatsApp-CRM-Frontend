@@ -18,6 +18,7 @@ import {
   sendattachments,
   getcontactchathistory,
 } from "../api/livechats";
+import { useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 function VoiceNote({ src, isSent }) {
   const audioRef = useRef(null);
@@ -147,6 +148,9 @@ function LiveChats() {
 
   const [selectedContact, setSelectedContact] = useState(null);
   const [chatMessages, setChatMessages] = useState([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [pendingContactParam, setPendingContactParam] = useState(false);
 
   const [contacterror, setcontacterror] = useState(
     "No contacts yet — new chats will appear here.",
@@ -162,6 +166,8 @@ function LiveChats() {
 
   const getMessageSignature = (con) =>
     con?.message?.[0]?.id ?? con?.message?.[0]?.createdAt ?? null;
+
+
 
   const getcontactWithlastMessage = async () => {
     try {
@@ -280,6 +286,35 @@ function LiveChats() {
       return next;
     });
   };
+
+  // Auto-open a contact's chat when arriving via ?contact=<waId> in the URL
+  // (e.g. clicking the chat icon on the Contacts page).
+  const normalizeWaId = (id) => (id || "").replace(/\D/g, "");
+
+  useEffect(() => {
+      const targetWaId = searchParams.get("contact");
+      if (!targetWaId) {
+          setPendingContactParam(false);
+          return;
+      }
+
+      setPendingContactParam(true);
+
+      if (contacts.length === 0) return;
+
+      const match = contacts.find(
+          (c) => normalizeWaId(c.waId) === normalizeWaId(targetWaId)
+      );
+
+      if (match) {
+          openContact(match);
+      } else {
+          toast.error("Couldn't find that contact's chat.");
+      }
+
+      setPendingContactParam(false);
+      setSearchParams({}, { replace: true });
+  }, [contacts, searchParams]);
 
   const sendMessage = async () => {
     if (!message.trim() || !selectedContact) return;
@@ -535,17 +570,24 @@ function LiveChats() {
         className={`min-h-0 flex-1 flex-col bg-[#EAF7F4] ${selectedContact ? "flex" : "hidden md:flex"}`}
       >
         {!selectedContact ? (
-          <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
-              <FaWhatsapp size={40} className="text-[#25D366]" />
-            </div>
-            <h2 className="text-lg font-semibold text-[#1F2937]">
-              WhatsApp Chatbot CRM
-            </h2>
-            <p className="text-sm text-[#6B7280]">
-              Select a chat from the left to start viewing messages.
-            </p>
-          </div>
+            pendingContactParam ? (
+                <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
+                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#0EA894] border-t-transparent" />
+                    <p className="text-sm text-[#6B7280]">Opening chat...</p>
+                </div>
+            ) : (
+                <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
+                    <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
+                        <FaWhatsapp size={40} className="text-[#25D366]" />
+                    </div>
+                    <h2 className="text-lg font-semibold text-[#1F2937]">
+                        WhatsApp Chatbot CRM
+                    </h2>
+                    <p className="text-sm text-[#6B7280]">
+                        Select a chat from the left to start viewing messages.
+                    </p>
+                </div>
+            )
         ) : (
           <>
             {/* Header */}
