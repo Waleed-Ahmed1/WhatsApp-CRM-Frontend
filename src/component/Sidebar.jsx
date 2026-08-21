@@ -1,124 +1,262 @@
 import { NavLink } from "react-router-dom";
-import "../css/sidebar.css";
-import { FaWhatsapp, FaBox, FaTags } from "react-icons/fa";
-import { useState } from "react";
-import { MdContacts, MdContactPhone, MdContactMail } from 'react-icons/md';
+import { FaWhatsapp, FaUser, FaBullhorn } from "react-icons/fa";
+import { useEffect, useRef, useState } from "react";
+import { MdCategory, MdContacts, MdGroup } from "react-icons/md";
+import { LogOut, LucidePackage, Settings } from "lucide-react";
+import logo from "../../public/favicon.png";
 
 const NAV = [
-  { path: "/dashboard/chat", label: "Live Chats", icon: <FaWhatsapp size={18} color="#25D366" /> },
-  { path: "/dashboard/users", label: "System Users", icon: "👤" },
-  { path: "/dashboard/groups", label: "Groups", icon: "👥" },
-  { path: "/dashboard/contacts", label: "Contacts", icon: <MdContacts color="white" size={16}/> },
-  { path: "/dashboard/broadcast", label: "Broadcast", icon: "📢" },
-  // { path: "/dashboard/templates", label: "Templates", icon: "📝" },
-  // { path: "/dashboard/keywords", label: "Keywords", icon: "🔑" },
-  // { path: "/dashboard/uploads", label: "Uploads", icon: "📁" },
-  // { path: "/dashboard/analytics", label: "Analytics", icon: "📊" },
-
-  { path: "/dashboard/categories", label: "Category", icon: <FaTags size={13} /> },
-  { path: "/dashboard/products", label: "Products", icon: <FaBox size={11} color="#a4c063" /> },
-  { path: "/dashboard/settings", label: "Settings", icon: "⚙️" },
+  {
+    path: "/dashboard/chat",
+    label: "Live Chats",
+    icon: <FaWhatsapp size={18} />,
+    tint: "text-white",
+  },
+  {
+    path: "/dashboard/users",
+    label: "System Users",
+    icon: <FaUser size={18} />,
+    tint: "text-white",
+  },
+  {
+    path: "/dashboard/groups",
+    label: "Groups",
+    icon: <MdGroup size={18} />,
+    tint: "text-white",
+  },
+  {
+    path: "/dashboard/contacts",
+    label: "Contacts",
+    icon: <MdContacts size={18} />,
+    tint: "text-white",
+  },
+  {
+    path: "/dashboard/broadcast",
+    label: "Broadcast",
+    icon: <FaBullhorn size={18} />,
+    tint: "text-white",
+  },
+  {
+    path: "/dashboard/categories",
+    label: "Category",
+    icon: <MdCategory size={18} />,
+    tint: "text-white",
+  },
+  {
+    path: "/dashboard/products",
+    label: "Products",
+    icon: <LucidePackage size={18} />,
+    tint: "text-white",
+  },
+  {
+    path: "/dashboard/settings",
+    label: "Settings",
+    icon: <Settings size={18} />,
+    tint: "text-white",
+  },
 ];
 
-export default function Sidebar({
-  onLogout,
-  email = "example@gmail.com",
-  username = "Admin",
-}) {
-
+export default function Sidebar({ isExpanded, setIsExpanded, onLogout, email = "example@gmail.com", username = "Admin" }) {
   const [isOpen, setIsOpen] = useState(false);
+  const sidebarRef = useRef(null);
 
   const closeSidebar = () => setIsOpen(false);
 
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (
+        isExpanded &&
+        sidebarRef.current &&
+        !sidebarRef.current.contains(event.target)
+      ) {
+        setIsExpanded(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, [isExpanded]);
+
   return (
     <>
-      <div className="mobile-header">
+
+      <div className="flex items-center gap-3 bg-[#0B6F60] px-4 py-3 lg:hidden">
         <button
-          className="hamburger-btn"
+          className="text-xl text-white"
           onClick={() => setIsOpen(true)}
         >
           ☰
         </button>
-        <div className="mobile-header-title">
-          WhatsApp Panel
-        </div>
+
+        <span className="font-semibold text-white">WhatsApp Chatbot CRM</span>
       </div>
+
 
       {isOpen && (
         <div
-          className="sidebar-overlay"
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
           onClick={closeSidebar}
         />
       )}
 
-      <div className={isOpen ? "sidebar sidebar-open" : "sidebar"}>
 
-        {/* Header */}
-        <div className="sidebar-header">
-          <div className="sidebar-logo-row">
-            <div className="sidebar-logo">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-              </svg>
-            </div>
+      <div
+        ref={sidebarRef}
+        onDoubleClick={() => setIsExpanded(true)}
+        className={`fixed inset-y-0 left-0 z-30 hidden bg-[#0B6F60] py-5 transition-all duration-300 lg:flex ${
+          isExpanded
+            ? "w-60 flex-col items-start px-4"
+            : "w-[55px] flex-col items-center"
+        }`}
+      >
+        {/* Logo */}
 
-            <div>
-              <div className="sidebar-title">Whatsapp Panel</div>
-              <div className="sidebar-live">● LIVE</div>
-            </div>
+        <div
+          className={`mb-6 flex items-center gap-3 ${
+            isExpanded ? "w-full" : ""
+          }`}
+        >
+          <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl bg-white">
+            <img
+              src={logo}
+              alt="WhatsApp CRM"
+              className="h-full w-full object-fill"
+            />
           </div>
 
+          {isExpanded && (
+            <span className="text-lg font-semibold text-white">
+              WhatsApp CRM
+            </span>
+          )}
         </div>
 
         {/* Navigation */}
-        <nav className="sidebar-nav">
+
+        <nav
+          className={`flex flex-1 flex-col gap-2 ${
+            isExpanded ? "w-full" : "items-center"
+          }`}
+        >
+          {NAV.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                `group flex items-center gap-3 rounded-2xl p-3 transition ${
+                  isExpanded ? "w-full" : "h-11 w-11 justify-center"
+                } ${
+                  isActive
+                    ? "bg-[#0EA894] text-white shadow-[0_4px_10px_rgba(14,168,148,0.4)]"
+                    : `${item.tint} hover:brightness-110`
+                }`
+              }
+            >
+              {item.icon}
+
+              {isExpanded && (
+                <span className="text-sm font-medium">{item.label}</span>
+              )}
+
+              {!isExpanded && <Tooltip>{item.label}</Tooltip>}
+            </NavLink>
+          ))}
+        </nav>
+
+        {/* Logout */}
+
+        <div
+          className={`mt-4 ${
+            isExpanded ? "w-full" : "flex flex-col items-center"
+          }`}
+        >
+          <button
+            onClick={onLogout}
+            className={`group relative flex items-center gap-3 rounded-2xl p-3 text-white transition ${
+              isExpanded ? "w-full" : "h-11 w-11 justify-center"
+            }`}
+          >
+            <LogOut />
+
+            {isExpanded && <span>Sign Out</span>}
+
+            {!isExpanded && <Tooltip>Sign Out</Tooltip>}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile drawer */}
+
+      <div
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-[#0B6F60] transition-transform duration-300 lg:hidden ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex items-center gap-2.5 px-5 py-5">
+          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white">
+            <img
+              src={logo}
+              alt="WhatsApp CRM"
+              className="h-full w-full object-fill"
+            />
+          </div>
+
+          <div>
+            <div className="text-sm font-semibold text-white">
+              WhatsApp CRM
+            </div>
+
+          </div>
+        </div>
+
+        <nav className="flex flex-1 flex-col gap-1 px-3">
           {NAV.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
               onClick={closeSidebar}
               className={({ isActive }) =>
-                isActive ? "sidebar-link active" : "sidebar-link"
+                `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ${
+                  isActive
+                    ? "bg-[#0EA894] text-white"
+                    : "text-gray-300 hover:bg-white/10 hover:text-white"
+                }`
               }
             >
-              <span className="sidebar-icon">{item.icon}</span>
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg">
+                {item.icon}
+              </span>
+
               {item.label}
             </NavLink>
           ))}
         </nav>
 
-        {/* Footer */}
-        <div className="sidebar-footer">
-          <div className="sidebar-user">
-            <div className="sidebar-avatar">
-              {username.charAt(0).toUpperCase()}
-            </div>
-
-            <div>
-              <div className="sidebar-username">{username}</div>
-              <div className="sidebar-email">{email}</div>
-            </div>
-          </div>
-
-          <button onClick={onLogout} className="logout-btn">
-            <svg
-              width="13"
-              height="13"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-              <polyline points="16 17 21 12 16 7" />
-              <line x1="21" y1="12" x2="9" y2="12" />
-            </svg>
+        <div className="border-t border-white/10 px-4 py-4">
+          
+          <button
+            onClick={onLogout}
+            className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-[#ffffff] transition hover:bg-red-500/10"
+          >
+            <LogOut size={16} />
 
             Sign Out
           </button>
         </div>
       </div>
     </>
+  );
+}
 
+function Tooltip({ children }) {
+  return (
+    <div className="pointer-events-none absolute left-full top-1/2 z-50 ml-3 -translate-y-1/2 scale-95 whitespace-nowrap rounded-lg bg-[#1F2937] px-3 py-1.5 text-xs font-medium text-white opacity-0 shadow-lg transition duration-150 group-hover:scale-100 group-hover:opacity-100">
+      <span className="absolute -left-1 top-1/2 h-2 w-2 -translate-y-1/2 rotate-45 bg-[#1F2937]" />
+
+      {children}
+    </div>
   );
 }

@@ -1,22 +1,70 @@
-export default function InputDialog({ open, value, onChange, onSubmit, onClose }) {
+import React from "react";
+import { Tag } from "lucide-react";
+
+export default function InputDialog({
+  open,
+  value,
+  onChange,
+  onSubmit,
+  onClose,
+  saving,
+}) {
   if (!open) return null;
 
   return (
-    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ background: "#141824", border: "1px solid #232838", borderRadius: 10, padding: 20, width: 300 }}>
-        <p style={{ color: "#fff", fontSize: 14, marginBottom: 12 }}>Enter category name</p>
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-[0_20px_40px_rgba(0,0,0,0.12)]"
+      >
+        <div className="mb-5 flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl">
+            <Tag size={20} className="text-[#000000]" />
+          </div>
+
+          <div>
+            <h2 className="text-lg font-semibold text-[#1F2937]">
+              Add Category
+            </h2>
+
+            <p className="text-sm text-[#6B7280]">
+              Enter a new category name
+            </p>
+          </div>
+        </div>
 
         <input
           type="text"
           value={value}
-          onChange={(e) => onChange(e.target.value)}
           autoFocus
-          style={{ width: "100%", background: "#0b0d12", border: "1px solid #232838", borderRadius: 8, padding: "8px 10px", color: "#fff", fontSize: 13, boxSizing: "border-box", marginBottom: 16 }}
+          placeholder="Category name"
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && value.trim() && !saving) {
+              onSubmit();
+            }
+          }}
+          className="mb-6 w-full rounded-xl border border-[#D1D5DB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#1F2937] outline-none transition focus:border-[#0EA894] focus:ring-4 focus:ring-[#0EA894]/10"
         />
 
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-          <button onClick={onClose} style={{ background: "transparent", border: "1px solid #232838", color: "#9aa0ac", borderRadius: 6, padding: "6px 14px", cursor: "pointer" }}>Close</button>
-          <button onClick={onSubmit} style={{ background: "rgba(37,211,102,0.15)", border: "none", color: "#25d366", borderRadius: 6, padding: "6px 14px", cursor: "pointer" }}>Submit</button>
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={onClose}
+            className="rounded-xl border border-[#D1D5DB] px-5 py-2.5 text-sm font-medium text-[#6B7280] transition hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+
+          <button
+            disabled={!value.trim() || saving}
+            onClick={onSubmit}
+            className="rounded-xl bg-[#0B6F60] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#0B8A79] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {saving ? "Saving..." : "Add Category"}
+          </button>
         </div>
       </div>
     </div>

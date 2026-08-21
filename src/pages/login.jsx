@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { useDispatch } from "react-redux";
@@ -15,11 +15,20 @@ function Login() {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
+
+
     const loginbutton = async () => {
         if (!email || !password) {
             toast.error("Email and password are required");
             return;
         }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            toast.error("Please enter a valid email address");
+            return;
+        }
+
 
         setLoading(true);
 
@@ -27,16 +36,18 @@ function Login() {
             const res = await loginuser(email, password);
 
             if (res.data.accessToken) {
+                const { password, ...safeUser } = res.data.user;
+
                 dispatch(
                     loginSuccess({
-                        user: res.data.user,
+                        user: safeUser,
                         accessToken: res.data.accessToken,
                     })
                 );
 
-                localStorage.setItem("token", res.data.accessToken);
-                localStorage.setItem("user", JSON.stringify(res.data.user));
-                toast.success(`Welcome ${res.data.user.name}`)
+                localStorage.setItem("accessToken", res.data.accessToken);
+                localStorage.setItem("user", JSON.stringify(safeUser));
+                toast.success(`Welcome ${safeUser.name}`)
                 navigate("/dashboard/chat", { replace: true });
             }
         } catch (err) {
@@ -112,10 +123,16 @@ function Login() {
                                 >
                                     {loading ? "Signing in..." : "Sign In"}
                                 </button>
+                                 <Link
+                                        to="/forgot_password"
+                                        className="text-sm text-[#0EA894] hover:text-[#0B8A79] transition-colors"
+                                    >
+                                        Forgot Password
+                                    </Link>
 
                             </div>
 
-                            <div className="mt-6 text-center">
+                            <div className="mt-4 text-center">
                                 <p className="text-sm text-[#6B7280]">
                                     Don't have an account?{" "}
                                     <Link

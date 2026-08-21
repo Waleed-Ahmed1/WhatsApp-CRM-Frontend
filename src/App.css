@@ -1,1 +1,18 @@
 @import "tailwindcss";
+.chat-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #0EA894 #dff5e8;
+}
+
+.chat-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chat-scroll::-webkit-scrollbar-track {
+  background: #dff5e8;
+}
+
+.chat-scroll::-webkit-scrollbar-thumb {
+  background: #10b981;
+  border-radius: 9999px;
+}
