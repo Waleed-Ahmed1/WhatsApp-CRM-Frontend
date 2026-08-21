@@ -15,6 +15,36 @@ function Login() {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
+
+    useEffect(() => {
+        const checkExistingSession = async () => {
+            const hasToken = !!localStorage.getItem("accessToken");
+            if (!hasToken) return;
+ 
+            try {
+                const { data } = await api.post("/auth/refresh");
+                localStorage.setItem("accessToken", data.accessToken);
+ 
+                dispatch(
+                    loginSuccess({
+                        user: JSON.parse(localStorage.getItem("user") || "null"),
+                        accessToken: data.accessToken,
+                    })
+                );
+ 
+                navigate("/dashboard/chat", { replace: true });
+            } catch {
+                // No valid session — clear stale token and just show the login form.
+                localStorage.removeItem("accessToken");
+                localStorage.removeItem("user");
+            }
+        };
+ 
+        checkExistingSession();
+        
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     const loginbutton = async () => {
         if (!email || !password) {
             toast.error("Email and password are required");
