@@ -3,7 +3,7 @@ import Login from "./pages/login.jsx";
 import Register from "./pages/register.jsx";
 import Logout from "./pages/logout.jsx";
 import LiveChats from "./pages/livechats.jsx";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { FaCircleCheck } from "react-icons/fa6";
 import { MdErrorOutline } from "react-icons/md";
@@ -81,6 +81,7 @@ function App() {
 
                 <Route element={<ProtectedRoute />}>
                     <Route path="/dashboard" element={<DashboardLayout />}>
+                        <Route index element={<Navigate to="chat" replace />} />
                         <Route path="chat" element={<LiveChats />} />
                         <Route path="users" element={<SystemUsers />} />
                         <Route path="groups" element={<Groups />} />
