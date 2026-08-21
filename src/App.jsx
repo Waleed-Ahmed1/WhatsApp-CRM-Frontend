@@ -16,6 +16,7 @@ import ProductView from "./pages/productview.jsx";
 import Contacts from "./pages/contacts.jsx";
 import Groups from "./pages/groups.jsx";
 import ProtectedRoute from "./component/ProtectedRoute.jsx";
+import SessionGate from "./component/SessionGate.jsx";
 import Broadcast from "./pages/broadcast.jsx";
 import ForgotPassword from "./pages/forgotpassword.jsx";
 
@@ -27,7 +28,6 @@ function App() {
                 reverseOrder={false}
                 toastOptions={{
                     duration: 4000,
-
                     style: {
                         margin: "0 20px 20px 0",
                         background: "#FFFFFF",
@@ -41,39 +41,27 @@ function App() {
                         fontWeight: "500",
                         minWidth: "300px",
                     },
-
                     success: {
                         icon: (
                             <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#EAF7F4]">
-                                <FaCircleCheck
-                                    color="#0B6F60"
-                                    size={17}
-                                />
+                                <FaCircleCheck color="#0B6F60" size={17} />
                             </div>
                         ),
-                        style: {
-                            borderLeft: "4px solid #0B6F60",
-                        },
+                        style: { borderLeft: "4px solid #0B6F60" },
                     },
-
                     error: {
                         icon: (
                             <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#FEE2E2]">
-                                <MdErrorOutline
-                                    color="#DC2626"
-                                    size={19}
-                                />
+                                <MdErrorOutline color="#DC2626" size={19} />
                             </div>
                         ),
-                        style: {
-                            borderLeft: "4px solid #DC2626",
-                        },
+                        style: { borderLeft: "4px solid #DC2626" },
                     },
                 }}
             />
 
             <Routes>
-                <Route path="/" element={<Login />} />
+                <Route path="/" element={<SessionGate />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/logout" element={<Logout />} />
