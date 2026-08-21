@@ -8,7 +8,7 @@ export const sendSystemLevelTextBroadcast = (text) => {
 
 export const sendSystemLevelMediaBroadcast = (media, caption = "") => {
     const formData = new FormData();
-    formData.append("media", media);
+    formData.append("files", media);
     if (caption) {
         formData.append("caption", caption);
     }
@@ -27,7 +27,7 @@ export const sendGroupLevelTextBroadcast = (text, groupIds) => {
 
 export const sendGroupLevelMediaBroadcast = (media, groupIds, caption = "") => {
     const formData = new FormData();
-    formData.append("media", media);
+    formData.append("files", media);
     if (caption) {
         formData.append("caption", caption);
     }
