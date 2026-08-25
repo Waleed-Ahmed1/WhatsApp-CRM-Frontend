@@ -306,6 +306,8 @@ function Groups() {
     }
 
     useEffect(() => {
+        if (!group?.id) return;
+
         const fetchgroupDelay = async () => {
             setLoading(true);
             try {
