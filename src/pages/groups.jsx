@@ -219,7 +219,8 @@ function Groups() {
         if (!showAddMember) {
             try {
                 const res = await getcontacts();
-                setAllContacts(res.data.contacts || []);
+                const contacts = res.data.contacts || [];
+                setAllContacts(contacts.filter((c) => c.groups.length === 0));
             } catch (err) {
                 setAllContacts([]);
             }
@@ -227,6 +228,20 @@ function Groups() {
         setShowAddMember((prev) => !prev);
         setSelectedContactId("");
     };
+    // const toggleAddMember = async () => {
+    //     if (!showAddMember) {
+    //         try {
+    //             const res = await getcontacts();
+    //             const contacts = res.data.contacts || [];
+    //             setAllContacts(contacts.filter((c) => c.groups.length === 0));
+    //         } catch (err) {
+    //             setAllContacts([]);
+    //         }
+    //     }
+    //     setShowAddMember((prev) => !prev);
+    //     setSelectedContactId("");
+    // };
+
 
     const addMember = async () => {
         if (!selectedContactId) {
