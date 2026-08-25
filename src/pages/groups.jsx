@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import {
     getallgroups, getgroupbyid, getgroupmembers, creategroup, deletegroup, addcontacttogroup, removecontactfromgroup, setdescription, deletedescription, setgroupprompt, deletegroupprompt,
-    updategroupname, tooglegroupmodebyid
+    updategroupname, tooglegroupmodebyid, setGroupDelay, getGroupDelay
 } from "../api/groups";
 import { getcontacts } from "../api/contacts";
 import toast from "react-hot-toast";
 import ConfirmDialog from "../component/ConfirmDailog";
-import { Users, Plus, X, Search, Pencil, Trash2, Sparkles, ArrowLeft } from "lucide-react";
+import { Users, Plus, X, Search, Pencil, Trash2, Sparkles, ArrowLeft, Clock} from "lucide-react";
+import { setdelay } from "../api/setting";
 
 const AVATAR_COLORS = [
     "bg-[#0EA894]", "bg-[#0B6F60]", "bg-[#F59E0B]", "bg-[#8B5CF6]",
@@ -288,6 +289,39 @@ function Groups() {
         }
     };
 
+    const [delay, setDelay] = useState(5);
+    const [saving, setSaving] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+    const setgroupDelay = async (id,value) =>{
+        setSaving(true)
+        try{
+            const res = await setGroupDelay(id,value);
+            toast.success(res.data.message || "Delay updated");
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to update delay"); 
+        }finally{
+            setSaving(false)
+        }
+    }
+
+    useEffect(() => {
+        if (!group?.id) return;
+
+        const fetchgroupDelay = async () => {
+            setLoading(true);
+            try {
+                const res = await getGroupDelay(group.id);
+                setDelay(res.data.delay ?? 5);
+            } catch (err) {
+                toast.error(err.response?.data?.message || "Failed to fetch the response delay");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchgroupDelay();
+    }, [group?.id]);
+
     const memberIds = new Set(members.map((m) => m.id));
     const availableContacts = allContacts.filter((c) => !memberIds.has(c.id));
 
@@ -537,6 +571,55 @@ function Groups() {
                                 )}
                             </div>
                         </div>
+
+
+
+
+
+                        <div className="rounded-2xl bg-white p-5 shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
+                            <h3 className="flex items-center gap-2 text-sm font-semibold text-[#1F2937]">
+                                <Clock size={15} className="text-[#0EA894]" />
+                                Group Reply Delay
+                            </h3>
+                            <p className="mb-4 mt-1 text-xs text-[#6B7280]">
+                                How long the bot waits before sending a reply, in seconds.
+                            </p>
+
+                            <div className="mb-4 flex items-center gap-3">
+                                <input
+                                    type="range"
+                                    min="1"
+                                    max="300"
+                                    value={delay}
+                                    onChange={(e) => setDelay(Number(e.target.value))}
+                                    disabled={loading}
+                                    className="h-1.5 w-full flex-1 cursor-pointer appearance-none rounded-full bg-[#E5E7EB] accent-[#0EA894] disabled:cursor-not-allowed"
+                                />
+                                <span className="w-14 flex-none rounded-full bg-[#0EA894]/10 py-1 text-center text-xs font-semibold text-[#0B6F60]">
+                                    {delay}s
+                                </span>
+                            </div>
+
+                            <button
+                                onClick={() => setgroupDelay(group.id, delay)}
+                                disabled={saving}
+                                className="rounded-xl bg-[#0B6F60] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#0B8A79] disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                {saving ? "Saving..." : "Save Delay"}
+                            </button>
+                        </div>
+
+
+
+
+
+
+
+
+
+
+
+                        
 
                         {/* members */}
                         <div className="rounded-2xl bg-white p-5 shadow-[0_4px_12px_rgba(0,0,0,0.06)]">

@@ -53,3 +53,12 @@ export const updategroupname = (id, name) => {
 export const tooglegroupmodebyid = (id, value) => {
     return api.patch(`/groups/toggle-group-ai-mode-by-id/${id}`, { value })
 }
+
+
+export const getGroupDelay = (id) => {
+    return api.get(`groups/get-group-delay/${id}`)
+}
+
+export const setGroupDelay = (id,value) => {
+    return api.patch(`/groups/set-group-delay/${id}`,{value})
+}
