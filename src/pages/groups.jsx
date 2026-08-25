@@ -82,11 +82,7 @@ function Groups() {
             setNameDraft(g.name);
             setDescriptionDraft(g.description || "");
             setPromptDraft(g.prompt || "");
-
-            const memberList = (membersRes.data.group?.contacts || [])
-                .map((gc) => gc.contact)
-                .filter(Boolean);   // ✅ drop null/undefined contacts
-            setMembers(memberList);
+            setMembers(membersRes.data.group.contacts.filter((c) => c.groupId === id));
         } catch (err) {
             toast.error(err.response?.data?.message || "Failed to load group");
         } finally {
@@ -218,15 +214,13 @@ function Groups() {
     };
 
     // ---- members ----
-    
+
     const toggleAddMember = async () => {
         if (!showAddMember) {
             try {
                 const res = await getcontacts();
                 const contacts = res.data?.contacts || [];
-                setAllContacts(
-                    contacts.filter((c) => c && Array.isArray(c.groups) && c.groups.length === 0)
-                );
+                setAllContacts(contacts.filter((c) => c.groupId === null));
             } catch (err) {
                 toast.error(err.response?.data?.message || "Failed to load contacts");
                 setAllContacts([]);
