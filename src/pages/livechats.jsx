@@ -315,6 +315,7 @@ function LiveChats() {
       setPendingContactParam(false);
       setSearchParams({}, { replace: true });
   }, [contacts, searchParams]);
+  
 
   const sendMessage = async () => {
     if (!message.trim() || !selectedContact) return;
@@ -578,7 +579,7 @@ function LiveChats() {
             ) : (
                 <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
                     <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
-                        <FaWhatsapp size={40} className="text-[#25D366]" />
+                        <FaWhatsapp size={40} className="text-[#0B6F60]"/>
                     </div>
                     <h2 className="text-lg font-semibold text-[#1F2937]">
                         WhatsApp Chatbot CRM

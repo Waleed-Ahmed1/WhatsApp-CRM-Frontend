@@ -15,7 +15,7 @@ const NAV = [
   {
     path: "/dashboard/users",
     label: "System Users",
-    icon: <FaUser size={18} />,
+    icon: <FaUser size={16} />,
     tint: "text-white",
   },
   {
