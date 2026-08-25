@@ -6,7 +6,7 @@ import {
 import { getcontacts } from "../api/contacts";
 import toast from "react-hot-toast";
 import ConfirmDialog from "../component/ConfirmDailog";
-import { Users, Plus, X, Search, Pencil, Trash2, Sparkles, ArrowLeft, Clock} from "lucide-react";
+import { Users, Plus, X, Search, Pencil, Trash2, Sparkles, ArrowLeft, Clock } from "lucide-react";
 import { setdelay } from "../api/setting";
 
 const AVATAR_COLORS = [
@@ -293,14 +293,14 @@ function Groups() {
     const [saving, setSaving] = useState(false);
     const [loading, setLoading] = useState(true);
 
-    const setgroupDelay = async (id,value) =>{
+    const setgroupDelay = async (id, value) => {
         setSaving(true)
-        try{
-            const res = await setGroupDelay(id,value);
+        try {
+            const res = await setGroupDelay(id, value);
             toast.success(res.data.message || "Delay updated");
         } catch (err) {
-            toast.error(err.response?.data?.message || "Failed to update delay"); 
-        }finally{
+            toast.error(err.response?.data?.message || "Failed to update delay");
+        } finally {
             setSaving(false)
         }
     }
@@ -336,7 +336,7 @@ function Groups() {
                     <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
                         <Users size={18} /> Groups
                     </h2>
-                  
+
                 </div>
 
                 {/* Search */}
@@ -386,9 +386,8 @@ function Groups() {
                                         <div
                                             key={g.id}
                                             onClick={() => selectGroup(g.id)}
-                                            className={`group relative flex cursor-pointer flex-col gap-2 rounded-2xl border bg-white p-4 shadow-[0_4px_12px_rgba(0,0,0,0.04)] transition hover:shadow-[0_6px_16px_rgba(0,0,0,0.08)] ${
-                                                isActive ? "border-[#0EA894] ring-1 ring-[#0EA894]" : "border-transparent"
-                                            }`}
+                                            className={`group relative flex cursor-pointer flex-col gap-2 rounded-2xl border bg-white p-4 shadow-[0_4px_12px_rgba(0,0,0,0.04)] transition hover:shadow-[0_6px_16px_rgba(0,0,0,0.08)] ${isActive ? "border-[#0EA894] ring-1 ring-[#0EA894]" : "border-transparent"
+                                                }`}
                                         >
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); setPendingDeleteId(g.id); }}
@@ -474,9 +473,8 @@ function Groups() {
                                         <button
                                             onClick={toggleAiMode}
                                             disabled={togglingMode}
-                                            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition disabled:opacity-60 ${
-                                                group.aiEnabled ? "bg-[#0EA894]/10 text-[#0B6F60]" : "bg-gray-100 text-[#6B7280]"
-                                            }`}
+                                            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition disabled:opacity-60 ${group.aiEnabled ? "bg-[#0EA894]/10 text-[#0B6F60]" : "bg-gray-100 text-[#6B7280]"
+                                                }`}
                                         >
                                             <span className={`h-2 w-2 rounded-full ${group.aiEnabled ? "bg-[#0EA894]" : "bg-[#9CA3AF]"}`} />
                                             {togglingMode ? "Updating..." : group.aiEnabled ? "AI On" : "AI Off"}
@@ -575,97 +573,92 @@ function Groups() {
 
 
 
+                        <div className="grid gap-4 md:grid-cols-2">
+                            <div className="rounded-2xl bg-white p-5 shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
+                                <h3 className="flex items-center gap-2 text-sm font-semibold text-[#1F2937]">
+                                    <Clock size={15} className="text-[#0EA894]" />
+                                    Group Reply Delay
+                                </h3>
+                                <p className="mb-4 mt-1 text-xs text-[#6B7280]">
+                                    How long the bot waits before sending a reply, in seconds.
+                                </p>
 
-                        <div className="rounded-2xl bg-white p-5 shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
-                            <h3 className="flex items-center gap-2 text-sm font-semibold text-[#1F2937]">
-                                <Clock size={15} className="text-[#0EA894]" />
-                                Group Reply Delay
-                            </h3>
-                            <p className="mb-4 mt-1 text-xs text-[#6B7280]">
-                                How long the bot waits before sending a reply, in seconds.
-                            </p>
+                                <div className="mb-4 flex items-center gap-3">
+                                    <input
+                                        type="range"
+                                        min="1"
+                                        max="300"
+                                        value={delay}
+                                        onChange={(e) => setDelay(Number(e.target.value))}
+                                        disabled={loading}
+                                        className="h-1.5 w-full flex-1 cursor-pointer appearance-none rounded-full bg-[#E5E7EB] accent-[#0EA894] disabled:cursor-not-allowed"
+                                    />
+                                    <span className="w-14 flex-none rounded-full bg-[#0EA894]/10 py-1 text-center text-xs font-semibold text-[#0B6F60]">
+                                        {delay}s
+                                    </span>
+                                </div>
 
-                            <div className="mb-4 flex items-center gap-3">
-                                <input
-                                    type="range"
-                                    min="1"
-                                    max="300"
-                                    value={delay}
-                                    onChange={(e) => setDelay(Number(e.target.value))}
-                                    disabled={loading}
-                                    className="h-1.5 w-full flex-1 cursor-pointer appearance-none rounded-full bg-[#E5E7EB] accent-[#0EA894] disabled:cursor-not-allowed"
-                                />
-                                <span className="w-14 flex-none rounded-full bg-[#0EA894]/10 py-1 text-center text-xs font-semibold text-[#0B6F60]">
-                                    {delay}s
-                                </span>
-                            </div>
-
-                            <button
-                                onClick={() => setgroupDelay(group.id, delay)}
-                                disabled={saving}
-                                className="rounded-xl bg-[#0B6F60] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#0B8A79] disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                                {saving ? "Saving..." : "Save Delay"}
-                            </button>
-                        </div>
-
-
-
-
-
-
-
-
-
-
-
-                        
-
-                        {/* members */}
-                        <div className="rounded-2xl bg-white p-5 shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
-                            <div className="mb-2 flex items-center justify-between">
-                                <h3 className="text-sm font-semibold text-[#1F2937]">Members ({members.length})</h3>
-                                <button onClick={toggleAddMember} className="text-xs font-medium text-[#0B6F60] hover:text-[#0EA894]">
-                                    {showAddMember ? "Close" : "+ Add Member"}
+                                <button
+                                    onClick={() => setgroupDelay(group.id, delay)}
+                                    disabled={saving}
+                                    className="rounded-lg bg-[#0B6F60] px-3 py-1.5 text-xs font-medium text-white transition hover:bg-[#0B8A79] disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                    {saving ? "Saving..." : "Save Delay"}
                                 </button>
                             </div>
 
-                            {showAddMember && (
-                                <div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-3">
-                                    <select
-                                        value={selectedContactId}
-                                        onChange={(e) => setSelectedContactId(e.target.value)}
-                                        className="h-9 flex-1 rounded-lg border border-[#E5E7EB] bg-white px-3 text-sm text-[#1F2937] outline-none focus:border-[#0EA894]"
-                                    >
-                                        <option value="">Select a contact</option>
-                                        {availableContacts.map((c) => (
-                                            <option key={c.id} value={c.id}>{c.name || c.waId}</option>
-                                        ))}
-                                    </select>
-                                    <button onClick={addMember} disabled={addingMember} className="rounded-lg bg-[#0B6F60] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#0B8A79] disabled:opacity-60">
-                                        {addingMember ? "Adding..." : "Add"}
-                                    </button>
-                                    <button onClick={toggleAddMember} className="rounded-lg border border-[#E5E7EB] bg-white px-3 py-1.5 text-xs font-medium text-[#374151] hover:bg-[#F3F4F6]">
-                                        Cancel
+
+                            {/* members */}
+                            <div className="rounded-2xl bg-white p-5 shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
+                                <div className="mb-2 flex items-center justify-between">
+                                    <h3 className="text-sm font-semibold text-[#1F2937]">Members ({members.length})</h3>
+                                    <button onClick={toggleAddMember} className="text-xs font-medium text-[#0B6F60] hover:text-[#0EA894]">
+                                        {showAddMember ? "Close" : "+ Add Member"}
                                     </button>
                                 </div>
-                            )}
 
-                            <div className="flex flex-wrap gap-2">
-                                {members.length === 0 ? (
-                                    <p className="text-sm text-[#9CA3AF]">No members in this group yet.</p>
-                                ) : (
-                                    members.map((m) => (
-                                        <span key={m.id} className="flex items-center gap-1.5 rounded-full bg-[#0EA894]/10 py-1.5 pl-3 pr-2 text-xs font-medium text-[#0B6F60]">
-                                            {m.name || m.waId}
-                                            <button onClick={() => removeMember(m.id)} className="flex h-4 w-4 items-center justify-center rounded-full transition hover:bg-[#0EA894]/20">
-                                                <X size={10} />
-                                            </button>
-                                        </span>
-                                    ))
+                                {showAddMember && (
+                                    <div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-3">
+                                        <select
+                                            value={selectedContactId}
+                                            onChange={(e) => setSelectedContactId(e.target.value)}
+                                            className="h-9 flex-1 rounded-lg border border-[#E5E7EB] bg-white px-3 text-sm text-[#1F2937] outline-none focus:border-[#0EA894]"
+                                        >
+                                            <option value="">Select a contact</option>
+                                            {availableContacts.map((c) => (
+                                                <option key={c.id} value={c.id}>{c.name || c.waId}</option>
+                                            ))}
+                                        </select>
+                                        <button onClick={addMember} disabled={addingMember} className="rounded-lg bg-[#0B6F60] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#0B8A79] disabled:opacity-60">
+                                            {addingMember ? "Adding..." : "Add"}
+                                        </button>
+                                        <button onClick={toggleAddMember} className="rounded-lg border border-[#E5E7EB] bg-white px-3 py-1.5 text-xs font-medium text-[#374151] hover:bg-[#F3F4F6]">
+                                            Cancel
+                                        </button>
+                                    </div>
                                 )}
+
+                                <div className="flex flex-wrap gap-2">
+                                    {members.length === 0 ? (
+                                        <p className="text-sm text-[#9CA3AF]">No members in this group yet.</p>
+                                    ) : (
+                                        members.map((m) => (
+                                            <span key={m.id} className="flex items-center gap-1.5 rounded-full bg-[#0EA894]/10 py-1.5 pl-3 pr-2 text-xs font-medium text-[#0B6F60]">
+                                                {m.name || m.waId}
+                                                <button onClick={() => removeMember(m.id)} className="flex h-4 w-4 items-center justify-center rounded-full transition hover:bg-[#0EA894]/20">
+                                                    <X size={10} />
+                                                </button>
+                                            </span>
+                                        ))
+                                    )}
+                                </div>
                             </div>
+
+
                         </div>
+
+
+
                     </div>
                 )}
             </div>
