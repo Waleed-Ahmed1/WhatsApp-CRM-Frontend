@@ -83,7 +83,9 @@ function Groups() {
             setDescriptionDraft(g.description || "");
             setPromptDraft(g.prompt || "");
 
-            const memberList = (membersRes.data.group?.contacts || []).map((gc) => gc.contact);
+            const memberList = (membersRes.data.group?.contacts || [])
+                .map((gc) => gc.contact)
+                .filter(Boolean);   // ✅ drop null/undefined contacts
             setMembers(memberList);
         } catch (err) {
             toast.error(err.response?.data?.message || "Failed to load group");
@@ -216,13 +218,17 @@ function Groups() {
     };
 
     // ---- members ----
+    
     const toggleAddMember = async () => {
         if (!showAddMember) {
             try {
                 const res = await getcontacts();
-                const contacts = res.data.contacts || [];
-                setAllContacts(contacts.filter((c) => c.groups.length === 0));
+                const contacts = res.data?.contacts || [];
+                setAllContacts(
+                    contacts.filter((c) => c && Array.isArray(c.groups) && c.groups.length === 0)
+                );
             } catch (err) {
+                toast.error(err.response?.data?.message || "Failed to load contacts");
                 setAllContacts([]);
             }
         }
@@ -381,6 +387,7 @@ function Groups() {
                                 </div>
                             ) : (
                                 filteredGroups.map((g, i) => {
+                                    if (!g) return null;
                                     const isActive = selectedId === g.id;
                                     return (
                                         <div
