@@ -59,6 +59,6 @@ export const getGroupDelay = (id) => {
     return api.get(`groups/get-group-delay/${id}`)
 }
 
-export const setGroupDelay = (id,value) => {
-    return api.patch(`/groups/set-group-delay/${id}`,{value})
+export const setGroupDelay = (id,delay) => {
+    return api.patch(`/groups/set-group-delay/${id}`,{delay})
 }
