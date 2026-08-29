@@ -24,3 +24,16 @@ export const sendattachments = (id, files, caption) => {
     return api.post(`/messages/send-attachment/${id}`, formData);
 };
 
+
+export const getcontactmessageusage = (contactId) => {
+    return api.get(`/contacts/contact/${contactId}/message-usage`);
+};
+
+// limit: a positive whole number, or null to fall back to the global setting
+export const setcontactmessagelimit = (contactId, limit) => {
+    return api.patch(`/contacts/contact/${contactId}/message-limit`, { limit });
+};
+
+export const resetcontactmessagecount = (contactId) => {
+    return api.post(`/contacts/contact/${contactId}/reset-message-count`);
+};

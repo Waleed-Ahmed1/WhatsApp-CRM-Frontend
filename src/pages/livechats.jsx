@@ -20,6 +20,7 @@ import {
 } from "../api/livechats";
 import { useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
+import ChatCapBar from "../component/ChatCapBar";
 function VoiceNote({ src, isSent }) {
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -624,6 +625,13 @@ function LiveChats() {
                 </button>
               </div>
             </div>
+
+            {/* AI reply cap */}
+            <ChatCapBar
+              key={selectedContactId}
+              contactId={selectedContactId}
+              refreshKey={chatMessages.length}
+            />
 
             {/* Messages */}
             <div className="relative min-h-0 flex-1 overflow-hidden">
