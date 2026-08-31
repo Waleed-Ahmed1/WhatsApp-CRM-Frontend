@@ -62,3 +62,11 @@ export const getGroupDelay = (id) => {
 export const setGroupDelay = (id,delay) => {
     return api.patch(`/groups/set-group-delay/${id}`,{delay})
 }
+// limit: a positive whole number, or null to fall back to the global setting
+export const setGroupMessageLimit = (id, limit) => {
+    return api.patch(`/groups/set-group-message-limit/${id}`, { limit })
+}
+
+export const getGroupMessageLimit = (id) => {
+    return api.get(`/groups/get-group-message-limit/${id}`)
+}

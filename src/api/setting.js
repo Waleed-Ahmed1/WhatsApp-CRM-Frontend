@@ -49,3 +49,11 @@ export const getOpenAiKey = () => {
 };
 
 // added comment for pushing
+// limit: a positive whole number, or null to remove the cap entirely
+export const setmaxmessagespercontact = (limit) => {
+    return api.patch('/settings/set-max-messages-per-contact', { limit });
+};
+
+export const getmaxmessagespercontact = () => {
+    return api.get('/settings/get-max-messages-per-contact');
+};

@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import {
     getallgroups, getgroupbyid, getgroupmembers, creategroup, deletegroup, addcontacttogroup, removecontactfromgroup, setdescription, deletedescription, setgroupprompt, deletegroupprompt,
-    updategroupname, tooglegroupmodebyid, setGroupDelay, getGroupDelay
+    updategroupname, tooglegroupmodebyid, setGroupDelay, getGroupDelay,
+    setGroupMessageLimit, getGroupMessageLimit
 } from "../api/groups";
+import MessageLimitInput from "../component/MessageLimitInput";
 import { getcontacts } from "../api/contacts";
 import toast from "react-hot-toast";
 import ConfirmDialog from "../component/ConfirmDailog";
-import { Users, Plus, X, Search, Pencil, Trash2, Sparkles, ArrowLeft, Clock } from "lucide-react";
+import { Users, Plus, X, Search, Pencil, Trash2, Sparkles, ArrowLeft, Clock, Gauge } from "lucide-react";
 import { setdelay } from "../api/setting";
 
 const AVATAR_COLORS = [
@@ -322,6 +324,39 @@ function Groups() {
         fetchgroupDelay();
     }, [group?.id]);
 
+    const [messageLimit, setMessageLimit] = useState(null);
+    const [savingLimit, setSavingLimit] = useState(false);
+    const [loadingLimit, setLoadingLimit] = useState(true);
+
+    const savegroupMessageLimit = async (id, value) => {
+        setSavingLimit(true);
+        try {
+            const res = await setGroupMessageLimit(id, value);
+            toast.success(res.data.message || "Message limit updated");
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to update message limit");
+        } finally {
+            setSavingLimit(false);
+        }
+    };
+
+    useEffect(() => {
+        if (!group?.id) return;
+
+        const fetchGroupMessageLimit = async () => {
+            setLoadingLimit(true);
+            try {
+                const res = await getGroupMessageLimit(group.id);
+                setMessageLimit(res.data.messageLimit ?? null);
+            } catch (err) {
+                toast.error(err.response?.data?.message || "Failed to fetch the message limit");
+            } finally {
+                setLoadingLimit(false);
+            }
+        };
+        fetchGroupMessageLimit();
+    }, [group?.id]);
+
     const memberIds = new Set(members.map((m) => m.id));
     const availableContacts = allContacts.filter((c) => !memberIds.has(c.id));
 
@@ -606,6 +641,43 @@ function Groups() {
                                 >
                                     {saving ? "Saving..." : "Save Delay"}
                                 </button>
+                            </div>
+
+                            {/* group message limit */}
+                            <div className="rounded-2xl bg-white p-5 shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
+                                <h3 className="flex items-center gap-2 text-sm font-semibold text-[#1F2937]">
+                                    <Gauge size={15} className="text-[#0EA894]" />
+                                    Group Message Limit
+                                </h3>
+                                <p className="mb-4 mt-1 text-xs text-[#6B7280]">
+                                    Max AI replies for each contact in this group. Applies per
+                                    contact, not shared across the group.
+                                </p>
+
+                                {/* key remounts the input when a different group is
+                                    selected, since it seeds its draft at mount */}
+                                {loadingLimit ? (
+                                    <div className="h-11 animate-pulse rounded-xl bg-[#F3F4F6]" />
+                                ) : (
+                                    <MessageLimitInput
+                                        key={group.id}
+                                        value={messageLimit}
+                                        onChange={setMessageLimit}
+                                        inheritLabel="Use global limit"
+                                    />
+                                )}
+
+                                <button
+                                    onClick={() => savegroupMessageLimit(group.id, messageLimit)}
+                                    disabled={savingLimit || loadingLimit}
+                                    className="mt-4 rounded-lg bg-[#0B6F60] px-3 py-1.5 text-xs font-medium text-white transition hover:bg-[#0B8A79] disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                    {savingLimit ? "Saving..." : "Save Limit"}
+                                </button>
+
+                                <p className="mt-3 text-xs text-[#9CA3AF]">
+                                    A contact's own limit overrides this.
+                                </p>
                             </div>
 
 

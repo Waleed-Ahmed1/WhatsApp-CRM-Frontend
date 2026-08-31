@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import {
     Settings as SettingsIcon,
     Clock,
+    Gauge,
     KeyRound,
     Bot,
     MessageSquare,
@@ -21,13 +22,20 @@ import {
     setgroqapikey,
     getgroqapikey,
     setOpenAiKey,
-    getOpenAiKey
+    getOpenAiKey,
+    setmaxmessagespercontact,
+    getmaxmessagespercontact
 } from "../api/setting";
+import MessageLimitInput from "../component/MessageLimitInput";
 
 function Settings() {
     const [delay, setDelay] = useState(5);
     const [saving, setSaving] = useState(false);
     const [loading, setLoading] = useState(true);
+
+    const [messageLimit, setMessageLimit] = useState(null);
+    const [savingLimit, setSavingLimit] = useState(false);
+    const [loadingLimit, setLoadingLimit] = useState(true);
 
     const [token, setToken] = useState("");
     const [savingToken, setSavingToken] = useState(false);
@@ -71,6 +79,32 @@ function Settings() {
             toast.error(err.response?.data?.message || "Response Delay cannot be Updated!");
         } finally {
             setSaving(false);
+        }
+    };
+
+    useEffect(() => {
+        const fetchMessageLimit = async () => {
+            try {
+                const res = await getmaxmessagespercontact();
+                setMessageLimit(res.data.maxMessagesPerContact ?? null);
+            } catch (err) {
+                toast.error(err.response?.data?.message || "Failed to Fetch the Message Limit");
+            } finally {
+                setLoadingLimit(false);
+            }
+        };
+        fetchMessageLimit();
+    }, []);
+
+    const handleSaveMessageLimit = async () => {
+        setSavingLimit(true);
+        try {
+            const res = await setmaxmessagespercontact(messageLimit);
+            toast.success(res.data.message || "Message Limit Updated Successfully!");
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Message Limit cannot be Updated!");
+        } finally {
+            setSavingLimit(false);
         }
     };
 
@@ -266,6 +300,43 @@ function Settings() {
                     >
                         {saving ? "Saving..." : "Save Delay"}
                     </button>
+                </div>
+
+                {/* Message Limit */}
+                <div className="rounded-2xl bg-white p-5 shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
+                    <h3 className="flex items-center gap-2 text-sm font-semibold text-[#1F2937]">
+                        <Gauge size={15} className="text-[#0EA894]" />
+                        Message Limit
+                    </h3>
+                    <p className="mb-4 mt-1 text-xs text-[#6B7280]">
+                        Max AI replies the bot will send to each contact. Counted for the
+                        contact's lifetime and resettable per chat. Groups and individual
+                        contacts can override this.
+                    </p>
+
+                    {/* Mounted only once the saved value has arrived: the input
+                        seeds its draft at mount and does not sync from props. */}
+                    {loadingLimit ? (
+                        <div className="h-11 animate-pulse rounded-xl bg-[#F3F4F6]" />
+                    ) : (
+                        <MessageLimitInput
+                            value={messageLimit}
+                            onChange={setMessageLimit}
+                            unlimitedLabel="No limit"
+                        />
+                    )}
+
+                    <button
+                        onClick={handleSaveMessageLimit}
+                        disabled={savingLimit || loadingLimit}
+                        className="mt-4 rounded-xl bg-[#0B6F60] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#0B8A79] disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                        {savingLimit ? "Saving..." : "Save Limit"}
+                    </button>
+
+                    <p className="mt-3 text-xs text-[#9CA3AF]">
+                        Manual replies and broadcasts don't count toward this.
+                    </p>
                 </div>
 
                 {/* WhatsApp Token */}
