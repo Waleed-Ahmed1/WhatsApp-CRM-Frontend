@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import "./App.css";
 import Login from "./pages/login.jsx";
 import Register from "./pages/register.jsx";
@@ -19,6 +20,10 @@ import ProtectedRoute from "./component/ProtectedRoute.jsx";
 import SessionGate from "./component/SessionGate.jsx";
 import Broadcast from "./pages/broadcast.jsx";
 import ForgotPassword from "./pages/forgotpassword.jsx";
+// Lazy so Recharts (~110kB gzipped) becomes its own chunk instead of loading
+// on the login screen. The dashboard is the landing page, so it still fetches
+// immediately after auth — just not before it.
+const Dashboard = lazy(() => import("./pages/dashboard.jsx"));
 
 function App() {
     return (
@@ -69,7 +74,21 @@ function App() {
 
                 <Route element={<ProtectedRoute />}>
                     <Route path="/dashboard" element={<DashboardLayout />}>
-                        <Route index element={<Navigate to="chat" replace />} />
+                        <Route index element={<Navigate to="overview" replace />} />
+                        <Route
+                            path="overview"
+                            element={
+                                <Suspense
+                                    fallback={
+                                        <div className="flex h-full w-full items-center justify-center bg-[#EAF7F4]">
+                                            <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#0EA894]/20 border-t-[#0EA894]" />
+                                        </div>
+                                    }
+                                >
+                                    <Dashboard />
+                                </Suspense>
+                            }
+                        />
                         <Route path="chat" element={<LiveChats />} />
                         <Route path="users" element={<SystemUsers />} />
                         <Route path="groups" element={<Groups />} />

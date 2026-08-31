@@ -2,10 +2,16 @@ import { NavLink } from "react-router-dom";
 import { FaWhatsapp, FaUser, FaBullhorn } from "react-icons/fa";
 import { useEffect, useRef, useState } from "react";
 import { MdCategory, MdContacts, MdGroup } from "react-icons/md";
-import { LogOut, LucidePackage, Settings } from "lucide-react";
+import { LayoutDashboard, LogOut, LucidePackage, Settings } from "lucide-react";
 import logo from "../../public/favicon.png";
 
 const NAV = [
+  {
+    path: "/dashboard/overview",
+    label: "Dashboard",
+    icon: <LayoutDashboard size={18} />,
+    tint: "text-white",
+  },
   {
     path: "/dashboard/chat",
     label: "Live Chats",
