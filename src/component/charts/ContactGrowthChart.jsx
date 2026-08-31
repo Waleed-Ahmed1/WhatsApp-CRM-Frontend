@@ -5,8 +5,8 @@ import { COLORS, gridProps, axisProps, tooltipProps, dateAxisInterval, shortDate
 
 export default function ContactGrowthChart({ series = [], days = 30 }) {
   return (
-    <ResponsiveContainer width="100%" height={224}>
-      <ComposedChart data={series} margin={{ top: 4, right: 8, left: -18, bottom: 0 }}>
+    <ResponsiveContainer width="100%" height={260}>
+      <ComposedChart data={series} margin={{ top: 4, right: 8, left: -18, bottom: 4 }}>
         <CartesianGrid {...gridProps} />
         <XAxis
           dataKey="date"
