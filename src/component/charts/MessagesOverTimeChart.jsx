@@ -6,7 +6,7 @@ import { COLORS, gridProps, axisProps, tooltipProps, dateAxisInterval, shortDate
 export default function MessagesOverTimeChart({ series = [], days = 30 }) {
   return (
     <ResponsiveContainer width="100%" height={260}>
-      <AreaChart data={series} margin={{ top: 4, right: 8, left: -18, bottom: 0 }}>
+      <AreaChart data={series} margin={{ top: 4, right: 8, left: -18, bottom: 4 }}>
         <defs>
           <linearGradient id="fillIncoming" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={COLORS.incoming} stopOpacity={0.35} />
