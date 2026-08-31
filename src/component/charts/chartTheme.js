@@ -37,8 +37,14 @@ export const tooltipProps = {
   cursor: { fill: "rgba(14,168,148,0.06)" },
 };
 
-// A 366-day x-axis is unreadable with every tick drawn.
-export const dateAxisInterval = (days) => (days > 31 ? "preserveStartEnd" : 0);
+// Forcing every tick (interval=0) only stays readable up to about a
+// week's worth of labels; beyond that, adjacent "Aug 2Aug 3…" labels run
+// into each other with no gap. Skip ticks so roughly 8-10 labels are
+// ever drawn, regardless of the range length.
+export const dateAxisInterval = (days) => {
+  if (days <= 8) return 0;
+  return Math.ceil(days / 8) - 1;
+};
 
 // "2026-08-01" -> "1 Aug". Parsed as UTC to match how the API bucketed it.
 export const shortDate = (value) => {
